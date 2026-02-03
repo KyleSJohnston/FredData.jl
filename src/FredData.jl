@@ -196,5 +196,12 @@ include("responses.jl")  # needed in Categories, Releases
 include("api_key.jl")
 include("categories.jl")
 include("releases.jl")
+include("series.jl")
+
+using .Responses
+export Series
+
+using .SeriesEndpoints
+export series
 
 end # module

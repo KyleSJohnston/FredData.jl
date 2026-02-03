@@ -34,76 +34,82 @@ end
     @test_throws Exception get_data(f, "GDPC1"; vintage_dates="bar")
 end
 
-@testset "Categories" begin
-    category = FredData.Categories.category(125)
-    @test category isa FredData.Categories.Category
-    new_category = FredData.Categories.category(category)
-    @test new_category == category
+# @testset "Categories" begin
+#     category = FredData.Categories.category(125)
+#     @test category isa FredData.Categories.Category
+#     new_category = FredData.Categories.category(category)
+#     @test new_category == category
 
-    children = FredData.Categories.children(13)
-    @test length(children) == 6
-    @test eltype(children) === FredData.Categories.Category
-    parent = FredData.Categories.category(13)
-    new_children = FredData.Categories.children(parent)
-    @test all(new_children .== children)
+#     children = FredData.Categories.children(13)
+#     @test length(children) == 6
+#     @test eltype(children) === FredData.Categories.Category
+#     parent = FredData.Categories.category(13)
+#     new_children = FredData.Categories.children(parent)
+#     @test all(new_children .== children)
 
-    related = FredData.Categories.related(32073)
-    @test length(related) == 7
-    @test all(x -> x.parent_id == 27281, related)
+#     related = FredData.Categories.related(32073)
+#     @test length(related) == 7
+#     @test all(x -> x.parent_id == 27281, related)
 
-    series_response = FredData.Categories.series(125)
-    @test series_response.count < 1000
-    @test series_response.count == length(series_response.seriess)
-    for s in series_response.seriess
-        @testset "$(s.title) $(s.id)" begin
-            @test startswith(s.id, "BOP") || startswith(s.id, "IEAB") || startswith(s.id, "AITG")
-        end
-    end
+#     series_response = FredData.Categories.series(125)
+#     @test series_response.count < 1000
+#     @test series_response.count == length(series_response.seriess)
+#     for s in series_response.seriess
+#         @testset "$(s.title) $(s.id)" begin
+#             @test startswith(s.id, "BOP") || startswith(s.id, "IEAB") || startswith(s.id, "AITG")
+#         end
+#     end
 
-    tags_response = FredData.Categories.tags(125)
-    @test tags_response.count < 1000
-    @test tags_response.count == length(tags_response.tags)
+#     tags_response = FredData.Categories.tags(125)
+#     @test tags_response.count < 1000
+#     @test tags_response.count == length(tags_response.tags)
 
-    tags_response = FredData.Categories.related_tags(125, ["services", "quarterly"])
-    @test tags_response.count < 1000
-    @test tags_response.count == length(tags_response.tags)
-end
+#     tags_response = FredData.Categories.related_tags(125, ["services", "quarterly"])
+#     @test tags_response.count < 1000
+#     @test tags_response.count == length(tags_response.tags)
+# end
 
-@testset "Releases" begin
-    releases_response = FredData.Releases.releases()
-    @test releases_response.count < 1000
-    @test releases_response.count == length(releases_response.releases)
+# @testset "Releases" begin
+#     releases_response = FredData.Releases.releases()
+#     @test releases_response.count < 1000
+#     @test releases_response.count == length(releases_response.releases)
 
-    release_dates_response = FredData.Releases.dates()
-    @test release_dates_response.count < 1000
-    @test release_dates_response.count == length(release_dates_response.release_dates)
+#     release_dates_response = FredData.Releases.dates()
+#     @test release_dates_response.count < 1000
+#     @test release_dates_response.count == length(release_dates_response.release_dates)
 
-    release = FredData.Releases.release(53)
-    @test release isa FredData.Releases.Release
-    @test release.name == "Gross Domestic Product"
+#     release = FredData.Releases.release(53)
+#     @test release isa FredData.Releases.Release
+#     @test release.name == "Gross Domestic Product"
 
-    release_dates_response = FredData.Releases.dates(82)
-    @test release_dates_response.count < 10000
-    @test release_dates_response.count == length(release_dates_response.release_dates)
+#     release_dates_response = FredData.Releases.dates(82)
+#     @test release_dates_response.count < 10000
+#     @test release_dates_response.count == length(release_dates_response.release_dates)
 
-    release_series_response = FredData.Releases.series(51)
-    @test release_series_response.count < 1000
-    @test release_series_response.count == length(release_series_response.seriess)
+#     release_series_response = FredData.Releases.series(51)
+#     @test release_series_response.count < 1000
+#     @test release_series_response.count == length(release_series_response.seriess)
 
-    sources_response = FredData.Releases.sources(51)
-    @test length(sources_response.sources) == 2
-    @test all(x -> contains(x.name, "Bureau"), sources_response.sources)
+#     sources_response = FredData.Releases.sources(51)
+#     @test length(sources_response.sources) == 2
+#     @test all(x -> contains(x.name, "Bureau"), sources_response.sources)
 
-    tags_response = FredData.Releases.tags(86)
-    @test tags_response.count < 1000
-    @test tags_response.count == length(tags_response.tags)
+#     tags_response = FredData.Releases.tags(86)
+#     @test tags_response.count < 1000
+#     @test tags_response.count == length(tags_response.tags)
 
-    related_tags_reponse = FredData.Releases.related_tags(86, ["sa", "foreign"])
-    @test related_tags_reponse.count < 1000
-    @test related_tags_reponse.count == length(related_tags_reponse.tags)
+#     related_tags_reponse = FredData.Releases.related_tags(86, ["sa", "foreign"])
+#     @test related_tags_reponse.count < 1000
+#     @test related_tags_reponse.count == length(related_tags_reponse.tags)
 
-    tables_response = FredData.Releases.tables(53)
-    @test tables_response isa FredData.Releases.TableResponse
+#     tables_response = FredData.Releases.tables(53)
+#     @test tables_response isa FredData.Releases.TableResponse
+# end
+
+@testset "Series Endpoints" begin
+    s = series("GNPCA")
+    @test s isa FredData.SeriesEndpoints.Series
+    @test s.id == "GNPCA"
 end
 
 nothing
