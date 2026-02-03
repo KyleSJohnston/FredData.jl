@@ -70,16 +70,20 @@ end
 # end
 
 @testset "Releases" begin
-    release = FredData.Releases.release(53)
-    @test release isa FredData.Releases.Release
-    @test release.name == "Gross Domestic Product"
-
     releases_response = FredData.Releases.releases()
     @test releases_response.count < 1000
     @test releases_response.count == length(releases_response.releases)
 
     release_dates_response = FredData.Releases.dates()
     @test release_dates_response.count < 1000
+    @test release_dates_response.count == length(release_dates_response.release_dates)
+
+    release = FredData.Releases.release(53)
+    @test release isa FredData.Releases.Release
+    @test release.name == "Gross Domestic Product"
+
+    release_dates_response = FredData.Releases.dates(82)
+    @test release_dates_response.count < 10000
     @test release_dates_response.count == length(release_dates_response.release_dates)
 end
 

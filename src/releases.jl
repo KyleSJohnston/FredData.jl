@@ -15,34 +15,6 @@ struct Release
     link::Union{Nothing,String}
 end
 
-struct ReleaseResponse
-    realtime_start::Date
-    realtime_end::Date
-    releases::Vector{Release}
-end
-
-function release(
-    release_id::Integer;
-    api_key::Union{Nothing,AbstractString}=nothing,
-    realtime_start::Union{Nothing,Date}=nothing,
-    realtime_end::Union{Nothing,Date}=nothing,
-)
-    query = [
-        "api_key" => APIKey.get(api_key),
-        "file_type" => "json",
-        "release_id" => release_id,
-    ]
-    if !isnothing(realtime_start)
-        push!(query, "realtime_start" => string(realtime_start))
-    end
-    if !isnothing(realtime_end)
-        push!(query, "realtime_end" => string(realtime_end))
-    end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/release"; query)
-    release_response = JSON.parse(http_response.body, ReleaseResponse)
-    return only(release_response.releases)
-end
-
 struct ReleasesResponse
     realtime_start::Date
     realtime_end::Date
@@ -90,13 +62,13 @@ function releases(;
     return releases_response
 end
 
-struct ReleaseDate
+struct NamedReleaseDate
     release_id::Int
     release_name::String
     date::Date
 end
 
-struct ReleaseDatesResponse
+struct ReleaseDatesResponse{T}
     realtime_start::Date
     realtime_end::Date
     order_by::String
@@ -104,7 +76,7 @@ struct ReleaseDatesResponse
     count::Int
     offset::Int
     limit::Int
-    release_dates::Vector{ReleaseDate}
+    release_dates::Vector{T}
 end
 
 function dates(;
@@ -143,13 +115,83 @@ function dates(;
         push!(query, "include_release_dates_with_no_data" => include_release_dates_with_no_data)
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/releases/dates"; query)
-    release_dates_response = JSON.parse(http_response.body, ReleaseDatesResponse)
+    release_dates_response = JSON.parse(http_response.body, ReleaseDatesResponse{NamedReleaseDate})
     return release_dates_response
 end
 
+struct ReleaseResponse
+    realtime_start::Date
+    realtime_end::Date
+    releases::Vector{Release}
+end
+
+function release(
+    release_id::Integer;
+    api_key::Union{Nothing,AbstractString}=nothing,
+    realtime_start::Union{Nothing,Date}=nothing,
+    realtime_end::Union{Nothing,Date}=nothing,
+)
+    query = [
+        "api_key" => APIKey.get(api_key),
+        "file_type" => "json",
+        "release_id" => release_id,
+    ]
+    if !isnothing(realtime_start)
+        push!(query, "realtime_start" => string(realtime_start))
+    end
+    if !isnothing(realtime_end)
+        push!(query, "realtime_end" => string(realtime_end))
+    end
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/release"; query)
+    release_response = JSON.parse(http_response.body, ReleaseResponse)
+    return only(release_response.releases)
+end
+
+struct ReleaseDate
+    release_id::Int
+    date::Date
+end
+
+function dates(
+    release_id::Integer;
+    api_key::Union{Nothing,AbstractString}=nothing,
+    realtime_start::Union{Nothing,Date}=nothing,
+    realtime_end::Union{Nothing,Date}=nothing,
+    limit::Union{Nothing,Integer}=nothing,
+    offset::Union{Nothing,Integer}=nothing,
+    sort_order::Union{Nothing,AbstractString}=nothing,
+    include_release_dates_with_no_data::Union{Nothing,Bool}=nothing,
+)
+    query = [
+        "api_key" => APIKey.get(api_key),
+        "file_type" => "json",
+        "release_id" => release_id,
+    ]
+    if !isnothing(realtime_start)
+        push!(query, "realtime_start" => string(realtime_start))
+    end
+    if !isnothing(realtime_end)
+        push!(query, "realtime_end" => string(realtime_end))
+    end
+    if !isnothing(limit)
+        push!(query, "limit" => limit)  # TODO: validate
+    end
+    if !isnothing(offset)
+        push!(query, "offset" => offset)  # TODO: validate
+    end
+    if !isnothing(sort_order)
+        push!(query, "sort_order" => sort_order)  # TODO: validate
+    end
+    if !isnothing(include_release_dates_with_no_data)
+        push!(query, "include_release_dates_with_no_data" => include_release_dates_with_no_data)
+    end
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/release/dates"; query)
+    release_dates_response = JSON.parse(http_response.body, ReleaseDatesResponse{ReleaseDate})
+    return release_dates_response
+end
 
 # Allow Release objects to be used in place of release_id integers
-for op in (:release, )
+for op in (:release, :dates)
     @eval $op(r::Release; kwargs...) = $op(r.id; kwargs...)
 end
 
