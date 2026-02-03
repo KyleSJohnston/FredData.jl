@@ -59,6 +59,14 @@ end
             @test startswith(s.id, "BOP") || startswith(s.id, "IEAB") || startswith(s.id, "AITG")
         end
     end
+
+    tags_response = FredData.Categories.tags(125)
+    @test tags_response.count < 1000
+    @test tags_response.count == length(tags_response.tags)
+
+    tags_response = FredData.Categories.related_tags(125; tag_names=["services", "quarterly"])
+    @test tags_response.count < 1000
+    @test tags_response.count == length(tags_response.tags)
 end
 
 nothing
