@@ -1,3 +1,4 @@
+"Global management of the required Fred API key"
 module APIKey
 
 using Logging
@@ -26,17 +27,39 @@ function validate(api_key::AbstractString)
     throw(ArgumentError("invalid api_key: $api_key"))
 end
 
+"""
+    set(api_key)
+
+Sets the global api-key constant to `api_key`
+
+This function is a useful alternative to passing `api_key` in every function,
+especially when the key is stored in an alternative location (outside ENV or
+outside ~/.freddatarc).
+"""
 function set(api_key::AbstractString)
     API_KEY[] = validate(api_key)
     return nothing
 end
 
-function get(::Nothing)
-    return API_KEY[]
-end
+"""
+    get(api_key)
 
+Validates and returns `api_key`
+"""
 function get(api_key::AbstractString)
     return validate(api_key)
+end
+
+"""
+    get(nothing)
+
+Retrieves the global api-key constant
+
+This method serves as the default approach to obtaining an api_key in many
+functions.
+"""
+function get(::Nothing)
+    return API_KEY[]
 end
 
 end  # module

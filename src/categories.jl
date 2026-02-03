@@ -1,5 +1,7 @@
 module Categories
 
+# See https://fred.stlouisfed.org/docs/api/fred/
+
 using Dates: Date, DateTime
 using HTTP
 using JSON
