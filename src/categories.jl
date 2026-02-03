@@ -5,11 +5,10 @@ module Categories
 using Dates: Date, DateTime
 using HTTP
 using JSON
-using Logging
 using StructUtils
 
 using ..APIKey
-using ..FredData: API_KEY_LENGTH, FRED_DATE_FORMAT, KEY_ENV_NAME, key_file
+using ..FredData: FRED_DATE_FORMAT
 
 struct Category
     id::Int

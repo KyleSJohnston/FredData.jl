@@ -194,5 +194,6 @@ include("get_data.jl")
 
 include("api_key.jl")
 include("categories.jl")
+include("releases.jl")
 
 end # module
