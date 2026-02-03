@@ -4,7 +4,84 @@ using Dates: Date, DateTime
 using StructUtils
 using ..FredData: FRED_DATE_FORMAT
 
-export Series, SeriesResponse, Tag, TagsResponse
+export Category, CategoryResponse
+export Release, ReleaseResponse, ReleasesResponse
+export ReleaseDate, NamedReleaseDate, ReleaseDatesResponse
+export Series, SeriesResponse
+export Source, SourcesResponse
+export TableElement, TableResponse
+export Tag, TagsResponse
+
+struct Category
+    id::Int
+    name::String
+    parent_id::Int
+end
+
+"""
+
+# Returned By:
+- `category`
+- `category/children`
+- `category/related`
+"""
+struct CategoryResponse
+    categories::Vector{Category}
+end
+
+struct Release
+    id::Int
+    realtime_start::Date
+    realtime_end::Date
+    name::String
+    press_release::Bool
+    link::Union{Nothing,String}
+end
+
+"""
+
+# Returned By:
+- `releases`
+"""
+struct ReleasesResponse
+    realtime_start::Date
+    realtime_end::Date
+    order_by::String
+    sort_order::String
+    count::Int
+    offset::Int
+    limit::Int
+    releases::Vector{Release}
+end
+
+struct ReleaseDate
+    release_id::Int
+    date::Date
+end
+
+struct NamedReleaseDate
+    release_id::Int
+    release_name::String
+    date::Date
+end
+
+struct ReleaseDatesResponse{T}
+    realtime_start::Date
+    realtime_end::Date
+    order_by::String
+    sort_order::String
+    count::Int
+    offset::Int
+    limit::Int
+    release_dates::Vector{T}
+end
+
+struct ReleaseResponse
+    realtime_start::Date
+    realtime_end::Date
+    releases::Vector{Release}
+end
+
 
 @tags struct Series
     id::String
@@ -34,6 +111,39 @@ struct SeriesResponse
     offset::Int
     limit::Int
     seriess::Vector{Series}
+end
+
+struct Source
+    id::Int
+    realtime_start::Date
+    realtime_end::Date
+    name::String
+    link::String
+end
+
+struct SourcesResponse
+    realtime_start::Date
+    realtime_end::Date
+    sources::Vector{Source}
+end
+
+struct TableElement
+    element_id::Int
+    release_id::Int
+    series_id::Union{Nothing,String}
+    parent_id::Union{Nothing,Int}
+    line::Union{Nothing,String}  # integer as string?
+    type::String
+    name::String
+    level::String  # integer as string?
+    children::Vector{TableElement}
+end
+
+struct TableResponse
+    name::Union{Nothing,String}
+    element_id::Union{Nothing,Int}
+    release_id::String  # integer as string?
+    elements::Dict{String,TableElement}
 end
 
 @tags struct Tag

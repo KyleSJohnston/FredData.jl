@@ -1,4 +1,4 @@
-module Categories
+module CategoriesEndpoints
 
 # See https://fred.stlouisfed.org/docs/api/fred/
 
@@ -8,17 +8,10 @@ using JSON
 using StructUtils
 
 using ..APIKey
-using ..Responses: SeriesResponse, TagsResponse
+using ..Responses: Category, CategoryResponse, SeriesResponse, TagsResponse
 
-struct Category
-    id::Int
-    name::String
-    parent_id::Int
-end
-
-struct CategoryResponse
-    categories::Vector{Category}
-end
+export category, category_children, category_related, category_series,
+    category_tags, category_related_tags
 
 function category(
     category_id::Integer;
@@ -30,11 +23,10 @@ function category(
         "category_id" => category_id,
     ]
     http_response = HTTP.get("https://api.stlouisfed.org/fred/category"; query)
-    category_response = JSON.parse(http_response.body, CategoryResponse)
-    return only(category_response.categories)
+    return JSON.parse(http_response.body, CategoryResponse)
 end
 
-function children(
+function category_children(
     category_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -52,11 +44,10 @@ function children(
         push!(query, "realtime_end" => string(realtime_end))
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/category/children"; query)
-    category_response = JSON.parse(http_response.body, CategoryResponse)
-    return category_response.categories
+    return JSON.parse(http_response.body, CategoryResponse)
 end
 
-function related(
+function category_related(
     category_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -74,12 +65,11 @@ function related(
         push!(query, "realtime_end" => string(realtime_end))
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/category/related"; query)
-    category_response = JSON.parse(http_response.body, CategoryResponse)
-    return category_response.categories
+    return JSON.parse(http_response.body, CategoryResponse)
 end
 
 
-function series(
+function category_series(
     category_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -126,11 +116,10 @@ function series(
         push!(query, "exclude_tag_names" => join(exclude_tag_names, ';'))  # TODO: maybe validate
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/category/series"; query)
-    series_response = JSON.parse(http_response.body, SeriesResponse)
-    return series_response
+    return JSON.parse(http_response.body, SeriesResponse)
 end
 
-function tags(
+function category_tags(
     category_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -176,11 +165,10 @@ function tags(
         push!(query, "sort_order" => sort_order)  # TODO: validate
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/category/tags"; query)
-    tags_response = JSON.parse(http_response.body, TagsResponse)
-    return tags_response
+    return JSON.parse(http_response.body, TagsResponse)
 end
 
-function related_tags(
+function category_related_tags(
     category_id::Integer,
     tag_names::AbstractVector{<:AbstractString};
     api_key::Union{Nothing,AbstractString}=nothing,
@@ -228,12 +216,14 @@ function related_tags(
         push!(query, "sort_order" => sort_order)  # TODO: validate
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/category/related_tags"; query)
-    tags_response = JSON.parse(http_response.body, TagsResponse)
-    return tags_response
+    return JSON.parse(http_response.body, TagsResponse)
 end
 
 # Allow Category objects to be used in place of category_id integers
-for op in (:category, :children, :related, :series, :tags, :related_tags)
+for op in (
+    :category, :category_children, :category_related, :category_series,
+    :category_tags, :category_related_tags,
+)
     @eval $op(c::Category; kwargs...) = $op(c.id; kwargs...)
 end
 

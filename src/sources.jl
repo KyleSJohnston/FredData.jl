@@ -1,0 +1,3 @@
+module SourcesEndpoints
+
+end  # module

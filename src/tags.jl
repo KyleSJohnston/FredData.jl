@@ -1,0 +1,3 @@
+module TagsEndpoints
+
+end  # module

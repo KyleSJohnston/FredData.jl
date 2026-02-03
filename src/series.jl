@@ -51,9 +51,8 @@ function series(
     if !isnothing(realtime_end)
         push!(query, "realtime_end" => string(realtime_end))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series"; query, verbose=true)
-    series_response = JSON.parse(http_response.body, SeriesResponse)
-    return only(series_response.seriess)
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/series"; query)
+    return JSON.parse(http_response.body, SeriesResponse)
 end
 
 end  # module

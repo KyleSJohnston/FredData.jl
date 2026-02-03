@@ -1,31 +1,17 @@
-module Releases
+module ReleasesEndpoints
 
 using Dates: Date, DateTime
 using HTTP
 using JSON
 
 using ..APIKey
-using ..Responses: SeriesResponse, TagsResponse
+using ..Responses: Release, ReleasesResponse, NamedReleaseDate, ReleaseDate,
+    ReleaseDatesResponse, ReleaseResponse, SeriesResponse,
+    SourcesResponse, TableResponse, TagsResponse
 
-struct Release
-    id::Int
-    realtime_start::Date
-    realtime_end::Date
-    name::String
-    press_release::Bool
-    link::Union{Nothing,String}
-end
+export releases, releases_dates, release, release_dates, release_series,
+    release_sources, release_tags, release_related_tags, release_tables
 
-struct ReleasesResponse
-    realtime_start::Date
-    realtime_end::Date
-    order_by::String
-    sort_order::String
-    count::Int
-    offset::Int
-    limit::Int
-    releases::Vector{Release}
-end
 
 function releases(;
     api_key::Union{Nothing,AbstractString}=nothing,
@@ -63,24 +49,7 @@ function releases(;
     return releases_response
 end
 
-struct NamedReleaseDate
-    release_id::Int
-    release_name::String
-    date::Date
-end
-
-struct ReleaseDatesResponse{T}
-    realtime_start::Date
-    realtime_end::Date
-    order_by::String
-    sort_order::String
-    count::Int
-    offset::Int
-    limit::Int
-    release_dates::Vector{T}
-end
-
-function dates(;
+function releases_dates(;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
     realtime_end::Union{Nothing,Date}=nothing,
@@ -120,11 +89,6 @@ function dates(;
     return release_dates_response
 end
 
-struct ReleaseResponse
-    realtime_start::Date
-    realtime_end::Date
-    releases::Vector{Release}
-end
 
 function release(
     release_id::Integer;
@@ -148,12 +112,7 @@ function release(
     return only(release_response.releases)
 end
 
-struct ReleaseDate
-    release_id::Int
-    date::Date
-end
-
-function dates(
+function release_dates(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -191,7 +150,7 @@ function dates(
     return release_dates_response
 end
 
-function series(
+function release_series(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -242,21 +201,7 @@ function series(
     return series_response
 end
 
-struct Source
-    id::Int
-    realtime_start::Date
-    realtime_end::Date
-    name::String
-    link::String
-end
-
-struct SourcesResponse
-    realtime_start::Date
-    realtime_end::Date
-    sources::Vector{Source}
-end
-
-function sources(
+function release_sources(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -279,7 +224,7 @@ function sources(
 end
 
 
-function tags(
+function release_tags(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -329,7 +274,7 @@ function tags(
     return tags_response
 end
 
-function related_tags(
+function release_related_tags(
     release_id::Integer,
     tag_names::AbstractVector{<:AbstractString};
     api_key::Union{Nothing,AbstractString}=nothing,
@@ -381,26 +326,7 @@ function related_tags(
     return tags_response
 end
 
-struct TableElement
-    element_id::Int
-    release_id::Int
-    series_id::Union{Nothing,String}
-    parent_id::Union{Nothing,Int}
-    line::Union{Nothing,String}  # integer as string?
-    type::String
-    name::String
-    level::String  # integer as string?
-    children::Vector{TableElement}
-end
-
-struct TableResponse
-    name::Union{Nothing,String}
-    element_id::Union{Nothing,Int}
-    release_id::String  # integer as string?
-    elements::Dict{String,TableElement}
-end
-
-function tables(
+function release_tables(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     element_id::Union{Nothing,Integer}=nothing,
@@ -428,7 +354,10 @@ function tables(
 end
 
 # Allow Release objects to be used in place of release_id integers
-for op in (:release, :dates, :series, :sources, :tags, :related_tags, :tables)
+for op in (
+    :release, :release_dates, :release_series, :release_sources, :release_tags,
+    :release_related_tags, :release_tables,
+)
     @eval $op(r::Release; kwargs...) = $op(r.id; kwargs...)
 end
 
