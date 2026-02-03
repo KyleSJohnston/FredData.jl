@@ -46,6 +46,19 @@ end
     parent = FredData.Categories.category(13)
     new_children = FredData.Categories.children(parent)
     @test all(new_children .== children)
+
+    related = FredData.Categories.related(32073)
+    @test length(related) == 7
+    @test all(x -> x.parent_id == 27281, related)
+
+    series_response = FredData.Categories.series(125)
+    @test series_response.count < 1000
+    @test series_response.count == length(series_response.seriess)
+    for s in series_response.seriess
+        @testset "$(s.title) $(s.id)" begin
+            @test startswith(s.id, "BOP") || startswith(s.id, "IEAB") || startswith(s.id, "AITG")
+        end
+    end
 end
 
 nothing
