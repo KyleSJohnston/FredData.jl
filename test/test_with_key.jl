@@ -34,4 +34,18 @@ end
     @test_throws Exception get_data(f, "GDPC1"; vintage_dates="bar")
 end
 
+@testset "Categories" begin
+    category = FredData.Categories.category(125)
+    @test category isa FredData.Categories.Category
+    new_category = FredData.Categories.category(category)
+    @test new_category == category
+
+    children = FredData.Categories.children(13)
+    @test length(children) == 6
+    @test eltype(children) === FredData.Categories.Category
+    parent = FredData.Categories.category(13)
+    new_children = FredData.Categories.children(parent)
+    @test all(new_children .== children)
+end
+
 nothing

@@ -192,4 +192,7 @@ export
 
 include("get_data.jl")
 
+include("api_key.jl")
+include("categories.jl")
+
 end # module
