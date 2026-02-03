@@ -89,6 +89,10 @@ end
     release_series_response = FredData.Releases.series(51)
     @test release_series_response.count < 1000
     @test release_series_response.count == length(release_series_response.seriess)
+
+    sources_response = FredData.Releases.sources(51)
+    @test length(sources_response.sources) == 2
+    @test all(x -> contains(x.name, "Bureau"), sources_response.sources)
 end
 
 nothing

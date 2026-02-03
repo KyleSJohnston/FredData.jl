@@ -242,9 +242,45 @@ function series(
     return series_response
 end
 
+struct Source
+    id::Int
+    realtime_start::Date
+    realtime_end::Date
+    name::String
+    link::String
+end
+
+struct SourcesResponse
+    realtime_start::Date
+    realtime_end::Date
+    sources::Vector{Source}
+end
+
+function sources(
+    release_id::Integer;
+    api_key::Union{Nothing,AbstractString}=nothing,
+    realtime_start::Union{Nothing,Date}=nothing,
+    realtime_end::Union{Nothing,Date}=nothing,
+)
+    query = [
+        "api_key" => APIKey.get(api_key),
+        "file_type" => "json",
+        "release_id" => release_id,
+    ]
+    if !isnothing(realtime_start)
+        push!(query, "realtime_start" => string(realtime_start))
+    end
+    if !isnothing(realtime_end)
+        push!(query, "realtime_end" => string(realtime_end))
+    end
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/release/sources"; query)
+    sources_response = JSON.parse(http_response.body, SourcesResponse)
+    return sources_response
+end
+
 
 # Allow Release objects to be used in place of release_id integers
-for op in (:release, :dates, :series)
+for op in (:release, :dates, :series, :sources)
     @eval $op(r::Release; kwargs...) = $op(r.id; kwargs...)
 end
 
