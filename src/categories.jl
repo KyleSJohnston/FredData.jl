@@ -8,8 +8,7 @@ using JSON
 using StructUtils
 
 using ..APIKey
-using ..FredData: FRED_DATE_FORMAT
-using ..Responses: SeriesResponse
+using ..Responses: SeriesResponse, TagsResponse
 
 struct Category
     id::Int
@@ -129,26 +128,6 @@ function series(
     http_response = HTTP.get("https://api.stlouisfed.org/fred/category/series"; query)
     series_response = JSON.parse(http_response.body, SeriesResponse)
     return series_response
-end
-
-@tags struct Tag
-    name::String
-    group_id::String
-    notes::Union{Nothing,String}
-    created::DateTime &(json=(dateformat=FRED_DATE_FORMAT,),)
-    popularity::Int
-    series_count::Int
-end
-
-struct TagsResponse
-    realtime_start::Date
-    realtime_end::Date
-    order_by::String
-    sort_order::String
-    count::Int
-    offset::Int
-    limit::Int
-    tags::Vector{Tag}
 end
 
 function tags(

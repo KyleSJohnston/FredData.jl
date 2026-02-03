@@ -5,7 +5,7 @@ using HTTP
 using JSON
 
 using ..APIKey
-using ..Responses: SeriesResponse
+using ..Responses: SeriesResponse, TagsResponse
 
 struct Release
     id::Int
@@ -279,8 +279,58 @@ function sources(
 end
 
 
+function tags(
+    release_id::Integer;
+    api_key::Union{Nothing,AbstractString}=nothing,
+    realtime_start::Union{Nothing,Date}=nothing,
+    realtime_end::Union{Nothing,Date}=nothing,
+    tag_names::AbstractVector{<:AbstractString}=String[],
+    tag_group_id::Union{Nothing,AbstractString}=nothing,
+    search_text::Union{Nothing,AbstractString}=nothing,
+    limit::Union{Nothing,Integer}=nothing,
+    offset::Union{Nothing,Integer}=nothing,
+    order_by::Union{Nothing,AbstractString}=nothing,
+    sort_order::Union{Nothing,AbstractString}=nothing,
+)
+    query = [
+        "api_key" => APIKey.get(api_key),
+        "file_type" => "json",
+        "release_id" => release_id,
+    ]
+    if !isnothing(realtime_start)
+        push!(query, "realtime_start" => string(realtime_start))
+    end
+    if !isnothing(realtime_end)
+        push!(query, "realtime_end" => string(realtime_end))
+    end
+    if length(tag_names) > 0
+        push!(query, "tag_names" => join(tag_names, ';'))  # TODO: maybe validate
+    end
+    if !isnothing(tag_group_id)
+        push!(query, "tag_group_id" => tag_group_id)  # TODO: validate
+    end
+    if !isnothing(search_text)
+        push!(query, "search_text" => search_text)
+    end
+    if !isnothing(limit)
+        push!(query, "limit" => limit)  # TODO: validate
+    end
+    if !isnothing(offset)
+        push!(query, "offset" => offset)  # TODO: validate
+    end
+    if !isnothing(order_by)
+        push!(query, "order_by" => order_by)  # TODO: validate
+    end
+    if !isnothing(sort_order)
+        push!(query, "sort_order" => sort_order)  # TODO: validate
+    end
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/release/tags"; query)
+    tags_response = JSON.parse(http_response.body, TagsResponse)
+    return tags_response
+end
+
 # Allow Release objects to be used in place of release_id integers
-for op in (:release, :dates, :series, :sources)
+for op in (:release, :dates, :series, :sources, :tags)
     @eval $op(r::Release; kwargs...) = $op(r.id; kwargs...)
 end
 

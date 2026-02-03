@@ -34,40 +34,40 @@ end
     @test_throws Exception get_data(f, "GDPC1"; vintage_dates="bar")
 end
 
-# @testset "Categories" begin
-#     category = FredData.Categories.category(125)
-#     @test category isa FredData.Categories.Category
-#     new_category = FredData.Categories.category(category)
-#     @test new_category == category
+@testset "Categories" begin
+    category = FredData.Categories.category(125)
+    @test category isa FredData.Categories.Category
+    new_category = FredData.Categories.category(category)
+    @test new_category == category
 
-#     children = FredData.Categories.children(13)
-#     @test length(children) == 6
-#     @test eltype(children) === FredData.Categories.Category
-#     parent = FredData.Categories.category(13)
-#     new_children = FredData.Categories.children(parent)
-#     @test all(new_children .== children)
+    children = FredData.Categories.children(13)
+    @test length(children) == 6
+    @test eltype(children) === FredData.Categories.Category
+    parent = FredData.Categories.category(13)
+    new_children = FredData.Categories.children(parent)
+    @test all(new_children .== children)
 
-#     related = FredData.Categories.related(32073)
-#     @test length(related) == 7
-#     @test all(x -> x.parent_id == 27281, related)
+    related = FredData.Categories.related(32073)
+    @test length(related) == 7
+    @test all(x -> x.parent_id == 27281, related)
 
-#     series_response = FredData.Categories.series(125)
-#     @test series_response.count < 1000
-#     @test series_response.count == length(series_response.seriess)
-#     for s in series_response.seriess
-#         @testset "$(s.title) $(s.id)" begin
-#             @test startswith(s.id, "BOP") || startswith(s.id, "IEAB") || startswith(s.id, "AITG")
-#         end
-#     end
+    series_response = FredData.Categories.series(125)
+    @test series_response.count < 1000
+    @test series_response.count == length(series_response.seriess)
+    for s in series_response.seriess
+        @testset "$(s.title) $(s.id)" begin
+            @test startswith(s.id, "BOP") || startswith(s.id, "IEAB") || startswith(s.id, "AITG")
+        end
+    end
 
-#     tags_response = FredData.Categories.tags(125)
-#     @test tags_response.count < 1000
-#     @test tags_response.count == length(tags_response.tags)
+    tags_response = FredData.Categories.tags(125)
+    @test tags_response.count < 1000
+    @test tags_response.count == length(tags_response.tags)
 
-#     tags_response = FredData.Categories.related_tags(125; tag_names=["services", "quarterly"])
-#     @test tags_response.count < 1000
-#     @test tags_response.count == length(tags_response.tags)
-# end
+    tags_response = FredData.Categories.related_tags(125; tag_names=["services", "quarterly"])
+    @test tags_response.count < 1000
+    @test tags_response.count == length(tags_response.tags)
+end
 
 @testset "Releases" begin
     releases_response = FredData.Releases.releases()
@@ -93,6 +93,10 @@ end
     sources_response = FredData.Releases.sources(51)
     @test length(sources_response.sources) == 2
     @test all(x -> contains(x.name, "Bureau"), sources_response.sources)
+
+    tags_response = FredData.Releases.tags(86)
+    @test tags_response.count < 1000
+    @test tags_response.count == length(tags_response.tags)
 end
 
 nothing
