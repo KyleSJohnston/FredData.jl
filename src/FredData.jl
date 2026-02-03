@@ -192,6 +192,7 @@ export
 
 include("get_data.jl")
 
+include("responses.jl")  # needed in Categories, Releases
 include("api_key.jl")
 include("categories.jl")
 include("releases.jl")

@@ -5,6 +5,7 @@ using HTTP
 using JSON
 
 using ..APIKey
+using ..Responses: SeriesResponse
 
 struct Release
     id::Int
@@ -190,8 +191,60 @@ function dates(
     return release_dates_response
 end
 
+function series(
+    release_id::Integer;
+    api_key::Union{Nothing,AbstractString}=nothing,
+    realtime_start::Union{Nothing,Date}=nothing,
+    realtime_end::Union{Nothing,Date}=nothing,
+    limit::Union{Nothing,Integer}=nothing,
+    offset::Union{Nothing,Integer}=nothing,
+    order_by::Union{Nothing,AbstractString}=nothing,
+    sort_order::Union{Nothing,AbstractString}=nothing,
+    filter_variable::Union{Nothing,AbstractString}=nothing,
+    filter_value::Union{Nothing,AbstractString}=nothing,
+    tag_names::AbstractVector{<:AbstractString}=String[],
+    exclude_tag_names::AbstractVector{<:AbstractString}=String[],
+)
+    query = [
+        "api_key" => APIKey.get(api_key),
+        "file_type" => "json",
+        "release_id" => release_id,
+    ]
+    if !isnothing(realtime_start)
+        push!(query, "realtime_start" => string(realtime_start))
+    end
+    if !isnothing(realtime_end)
+        push!(query, "realtime_end" => string(realtime_end))
+    end
+    if !isnothing(limit)
+        push!(query, "limit" => limit)  # TODO: validate
+    end
+    if !isnothing(offset)
+        push!(query, "offset" => offset)  # TODO: validate
+    end
+    if !isnothing(order_by)
+        push!(query, "order_by" => order_by)  # TODO: validate
+    end
+    if !isnothing(sort_order)
+        push!(query, "sort_order" => sort_order)  # TODO: validate
+    end
+    if !isnothing(filter_variable)
+        push!(query, "filter_variable" => filter_variable)  # TODO: validate
+    end
+    if length(tag_names) > 0
+        push!(query, "tag_names" => join(tag_names, ';'))  # TODO: maybe validate
+    end
+    if length(exclude_tag_names) > 0
+        push!(query, "exclude_tag_names" => join(exclude_tag_names, ';'))  # TODO: maybe validate
+    end
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/release/series"; query)
+    series_response = JSON.parse(http_response.body, SeriesResponse)
+    return series_response
+end
+
+
 # Allow Release objects to be used in place of release_id integers
-for op in (:release, :dates)
+for op in (:release, :dates, :series)
     @eval $op(r::Release; kwargs...) = $op(r.id; kwargs...)
 end
 

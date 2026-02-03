@@ -85,6 +85,10 @@ end
     release_dates_response = FredData.Releases.dates(82)
     @test release_dates_response.count < 10000
     @test release_dates_response.count == length(release_dates_response.release_dates)
+
+    release_series_response = FredData.Releases.series(51)
+    @test release_series_response.count < 1000
+    @test release_series_response.count == length(release_series_response.seriess)
 end
 
 nothing
