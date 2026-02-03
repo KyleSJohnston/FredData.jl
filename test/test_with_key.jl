@@ -64,7 +64,7 @@ end
     @test tags_response.count < 1000
     @test tags_response.count == length(tags_response.tags)
 
-    tags_response = FredData.Categories.related_tags(125; tag_names=["services", "quarterly"])
+    tags_response = FredData.Categories.related_tags(125, ["services", "quarterly"])
     @test tags_response.count < 1000
     @test tags_response.count == length(tags_response.tags)
 end
@@ -97,6 +97,13 @@ end
     tags_response = FredData.Releases.tags(86)
     @test tags_response.count < 1000
     @test tags_response.count == length(tags_response.tags)
+
+    related_tags_reponse = FredData.Releases.related_tags(86, ["sa", "foreign"])
+    @test related_tags_reponse.count < 1000
+    @test related_tags_reponse.count == length(related_tags_reponse.tags)
+
+    tables_response = FredData.Releases.tables(53)
+    @test tables_response isa FredData.Releases.TableResponse
 end
 
 nothing

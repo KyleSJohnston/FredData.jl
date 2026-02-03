@@ -181,11 +181,11 @@ function tags(
 end
 
 function related_tags(
-    category_id::Integer;
+    category_id::Integer,
+    tag_names::AbstractVector{<:AbstractString};
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
     realtime_end::Union{Nothing,Date}=nothing,
-    tag_names::AbstractVector{<:AbstractString}=String[],
     exclude_tag_names::AbstractVector{<:AbstractString}=String[],
     tag_group_id::Union{Nothing,AbstractString}=nothing,
     search_text::Union{Nothing,AbstractString}=nothing,
@@ -198,15 +198,13 @@ function related_tags(
         "api_key" => APIKey.get(api_key),
         "file_type" => "json",
         "category_id" => category_id,
+        "tag_names" => join(tag_names, ';'),
     ]
     if !isnothing(realtime_start)
         push!(query, "realtime_start" => string(realtime_start))
     end
     if !isnothing(realtime_end)
         push!(query, "realtime_end" => string(realtime_end))
-    end
-    if length(tag_names) > 0
-        push!(query, "tag_names" => join(tag_names, ';'))  # TODO: maybe validate
     end
     if length(exclude_tag_names) > 0
         push!(query, "exclude_tag_names" => join(exclude_tag_names, ';'))  # TODO: maybe validate
