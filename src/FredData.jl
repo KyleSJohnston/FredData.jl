@@ -204,6 +204,7 @@ include("tags.jl")
 # --- Define the package API ---
 using .Responses
 export Category, CategoryResponse
+export Observation, ObservationsResponse
 export Release, ReleaseResponse, ReleasesResponse
 export ReleaseDate, NamedReleaseDate, ReleaseDatesResponse
 export Series, SeriesResponse

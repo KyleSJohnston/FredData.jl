@@ -117,6 +117,19 @@ end
     s = only(sr.seriess)
     @test s isa FredData.series.Series
     @test s.id == "GNPCA"
+
+    cr = FredData.series.categories("EXJPUS")
+    @test cr isa CategoryResponse
+    @test length(cr.categories) < 10
+
+    or = FredData.series.observations("GNPCA")
+    @test or isa ObservationsResponse
+    @test or.count < 100_000
+    @test or.count == length(or.observations)
+    for o in or.observations
+        @test o.realtime_start == or.realtime_start
+        @test o.realtime_end == or.realtime_end
+    end
 end
 
 nothing

@@ -5,6 +5,7 @@ using StructUtils
 using ..FredData: FRED_DATE_FORMAT
 
 export Category, CategoryResponse
+export Observation, ObservationsResponse
 export Release, ReleaseResponse, ReleasesResponse
 export ReleaseDate, NamedReleaseDate, ReleaseDatesResponse
 export Series, SeriesResponse
@@ -24,9 +25,33 @@ end
 - `category`
 - `category/children`
 - `category/related`
+- `series/categories`
 """
 struct CategoryResponse
     categories::Vector{Category}
+end
+
+struct Observation
+    realtime_start::Date
+    realtime_end::Date
+    date::Date
+    value::String
+end
+
+struct ObservationsResponse
+    realtime_start::Date
+    realtime_end::Date
+    observation_start::Date
+    observation_end::Date
+    units::String
+    output_type::Int
+    file_type::String
+    order_by::String
+    sort_order::String
+    count::Int
+    offset::Int
+    limit::Int
+    observations::Vector{Observation}
 end
 
 struct Release
