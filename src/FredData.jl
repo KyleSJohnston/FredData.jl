@@ -214,12 +214,6 @@ export TableElement, TableResponse
 export Tag, TagsResponse
 
 # endpoints
-public category, release, releases, series
-
-using .SourcesEndpoints
-export sources, source, source_releases
-
-using .TagsEndpoints
-export tags, related_tags, tags_series
+public category, release, releases, series, sources, tags
 
 end # module

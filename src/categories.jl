@@ -10,6 +10,8 @@ using StructUtils
 using ..APIKey
 using ..Responses: Category, CategoryResponse, SeriesResponse, TagsResponse
 
+public get, children, related, series, tags, related_tags
+
 function get(
     category_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,

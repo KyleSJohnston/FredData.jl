@@ -7,6 +7,8 @@ using JSON
 using ..APIKey
 using ..Responses: ReleasesResponse, NamedReleaseDate, ReleaseDatesResponse
 
+public get_all, dates
+
 function get_all(;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -96,6 +98,8 @@ using ..APIKey
 using ..Responses: Release, NamedReleaseDate, ReleaseDate,
     ReleaseDatesResponse, ReleaseResponse, SeriesResponse,
     SourcesResponse, TableResponse, TagsResponse
+
+public get, dates, series, sources, tags, related_tags, tables
 
 function get(
     release_id::Integer;
