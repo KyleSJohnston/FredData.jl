@@ -190,4 +190,21 @@ end
     @test rr.count == length(rr.releases)
 end
 
+@testset "Tags Endpoints" begin
+    tr = FredData.tags.get_all()
+    @test tr isa TagsResponse
+    @test tr.count > tr.limit
+    @test tr.limit == length(tr.tags)
+
+    tr = FredData.tags.related_tags(["weekly"])
+    @test tr isa TagsResponse
+    @test tr.count < tr.limit
+    @test tr.count == length(tr.tags)
+
+    sr = FredData.tags.series(["slovenia", "food", "oecd"])
+    @test sr isa SeriesResponse
+    @test sr.count < sr.limit
+    @test sr.count == length(sr.seriess)
+end
+
 nothing
