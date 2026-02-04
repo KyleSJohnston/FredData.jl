@@ -208,12 +208,12 @@ export Observation, ObservationsResponse
 export Release, ReleaseResponse, ReleasesResponse
 export ReleaseDate, NamedReleaseDate, ReleaseDatesResponse
 export Series, SeriesResponse, SingleSeriesResponse
-export Source, SourcesResponse
+export Source, SimpleSourcesResponse, SourcesResponse
 export TableElement, TableResponse
 export Tag, TagsResponse
 export VintageDatesResponse
 
 # endpoints
-public category, release, releases, series, sources, tags
+public category, release, releases, series, source, tags
 
 end # module

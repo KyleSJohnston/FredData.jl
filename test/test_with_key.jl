@@ -173,11 +173,21 @@ end
 end
 
 @testset "Sources Endpoints" begin
-    sr = FredData.sources.get_all()
+    sr = FredData.source.get_all()
     @test sr isa SourcesResponse
     @test sr.count < 1000
     @test sr.offset == 0
     @test sr.count == length(sr.sources)
+
+    ssr = FredData.source.get(1)
+    @test ssr isa SimpleSourcesResponse
+    @test length(ssr.sources) == 1
+
+    rr = FredData.source.releases(1)
+    @test rr isa ReleasesResponse
+    @test rr.count < 1000
+    @test rr.limit == 1000
+    @test rr.count == length(rr.releases)
 end
 
 nothing
