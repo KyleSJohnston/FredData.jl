@@ -1,19 +1,13 @@
-module ReleasesEndpoints
+module releases
 
 using Dates: Date, DateTime
 using HTTP
 using JSON
 
 using ..APIKey
-using ..Responses: Release, ReleasesResponse, NamedReleaseDate, ReleaseDate,
-    ReleaseDatesResponse, ReleaseResponse, SeriesResponse,
-    SourcesResponse, TableResponse, TagsResponse
+using ..Responses: ReleasesResponse, NamedReleaseDate, ReleaseDatesResponse
 
-export releases, releases_dates, release, release_dates, release_series,
-    release_sources, release_tags, release_related_tags, release_tables
-
-
-function releases(;
+function get_all(;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
     realtime_end::Union{Nothing,Date}=nothing,
@@ -49,7 +43,7 @@ function releases(;
     return releases_response
 end
 
-function releases_dates(;
+function dates(;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
     realtime_end::Union{Nothing,Date}=nothing,
@@ -89,8 +83,21 @@ function releases_dates(;
     return release_dates_response
 end
 
+end  # module
 
-function release(
+
+module release
+
+using Dates: Date, DateTime
+using HTTP
+using JSON
+
+using ..APIKey
+using ..Responses: Release, NamedReleaseDate, ReleaseDate,
+    ReleaseDatesResponse, ReleaseResponse, SeriesResponse,
+    SourcesResponse, TableResponse, TagsResponse
+
+function get(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -112,7 +119,7 @@ function release(
     return only(release_response.releases)
 end
 
-function release_dates(
+function dates(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -150,7 +157,7 @@ function release_dates(
     return release_dates_response
 end
 
-function release_series(
+function series(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -201,7 +208,7 @@ function release_series(
     return series_response
 end
 
-function release_sources(
+function sources(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -224,7 +231,7 @@ function release_sources(
 end
 
 
-function release_tags(
+function tags(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -274,7 +281,7 @@ function release_tags(
     return tags_response
 end
 
-function release_related_tags(
+function related_tags(
     release_id::Integer,
     tag_names::AbstractVector{<:AbstractString};
     api_key::Union{Nothing,AbstractString}=nothing,
@@ -326,7 +333,7 @@ function release_related_tags(
     return tags_response
 end
 
-function release_tables(
+function tables(
     release_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     element_id::Union{Nothing,Integer}=nothing,
@@ -355,10 +362,10 @@ end
 
 # Allow Release objects to be used in place of release_id integers
 for op in (
-    :release, :release_dates, :release_series, :release_sources, :release_tags,
-    :release_related_tags, :release_tables,
+    :get, :dates, :series, :sources, :tags,
+    :related_tags, :tables,
 )
-    @eval $op(r::Release; kwargs...) = $op(r.id; kwargs...)
+    @eval $op(r::Release, args...; kwargs...) = $op(r.id, args...; kwargs...)
 end
 
 end  # module

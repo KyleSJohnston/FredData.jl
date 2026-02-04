@@ -211,18 +211,18 @@ export Source, SourcesResponse
 export TableElement, TableResponse
 export Tag, TagsResponse
 
-using .CategoriesEndpoints
-export category, category_children, category_related, category_series,
-    category_tags, category_related_tags
+# using .CategoriesEndpoints
+# export category, category_children, category_related, category_series,
+#     category_tags, category_related_tags
 
-using .ReleasesEndpoints
-export releases, releases_dates, release, release_dates, release_series,
-    release_sources, release_tags, release_related_tags, release_tables
+# using .ReleasesEndpoints
+# export releases, releases_dates, release, release_dates, release_series,
+#     release_sources, release_tags, release_related_tags, release_tables
 
-using .SeriesEndpoints
-export series, series_categories, series_observations, series_release,
-    series_search, series_search_tags, series_search_related_tags, series_tags,
-    series_updates, series_vintagedates
+# using .SeriesEndpoints
+# export series, series_categories, series_observations, series_release,
+#     series_search, series_search_tags, series_search_related_tags, series_tags,
+#     series_updates, series_vintagedates
 
 using .SourcesEndpoints
 export sources, source, source_releases

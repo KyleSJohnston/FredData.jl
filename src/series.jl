@@ -1,4 +1,4 @@
-module SeriesEndpoints
+module series
 
 using Dates: Date, DateTime
 using HTTP
@@ -34,7 +34,7 @@ struct SeriesResponse
     seriess::Vector{Series}
 end
 
-function series(
+function get(
     series_id::AbstractString;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,

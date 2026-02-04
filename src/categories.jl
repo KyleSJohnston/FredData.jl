@@ -1,4 +1,4 @@
-module CategoriesEndpoints
+module category
 
 # See https://fred.stlouisfed.org/docs/api/fred/
 
@@ -10,10 +10,7 @@ using StructUtils
 using ..APIKey
 using ..Responses: Category, CategoryResponse, SeriesResponse, TagsResponse
 
-export category, category_children, category_related, category_series,
-    category_tags, category_related_tags
-
-function category(
+function get(
     category_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
 )
@@ -26,7 +23,7 @@ function category(
     return JSON.parse(http_response.body, CategoryResponse)
 end
 
-function category_children(
+function children(
     category_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -47,7 +44,7 @@ function category_children(
     return JSON.parse(http_response.body, CategoryResponse)
 end
 
-function category_related(
+function related(
     category_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -69,7 +66,7 @@ function category_related(
 end
 
 
-function category_series(
+function series(
     category_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -119,7 +116,7 @@ function category_series(
     return JSON.parse(http_response.body, SeriesResponse)
 end
 
-function category_tags(
+function tags(
     category_id::Integer;
     api_key::Union{Nothing,AbstractString}=nothing,
     realtime_start::Union{Nothing,Date}=nothing,
@@ -168,7 +165,7 @@ function category_tags(
     return JSON.parse(http_response.body, TagsResponse)
 end
 
-function category_related_tags(
+function related_tags(
     category_id::Integer,
     tag_names::AbstractVector{<:AbstractString};
     api_key::Union{Nothing,AbstractString}=nothing,
@@ -220,10 +217,7 @@ function category_related_tags(
 end
 
 # Allow Category objects to be used in place of category_id integers
-for op in (
-    :category, :category_children, :category_related, :category_series,
-    :category_tags, :category_related_tags,
-)
+for op in (:get, :children, :related, :series, :tags, :related_tags)
     @eval $op(c::Category; kwargs...) = $op(c.id; kwargs...)
 end
 
