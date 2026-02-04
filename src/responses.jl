@@ -9,7 +9,7 @@ export Observation, ObservationsResponse
 export Release, ReleaseResponse, ReleasesResponse
 export ReleaseDate, NamedReleaseDate, ReleaseDatesResponse
 export Series, SeriesResponse, SingleSeriesResponse
-export Source, SourcesResponse
+export Source, SimpleSourcesResponse, SourcesResponse
 export TableElement, TableResponse
 export Tag, TagsResponse
 export VintageDatesResponse
@@ -145,15 +145,27 @@ struct SingleSeriesResponse
     seriess::Vector{Series}
 end
 
-struct Source
+@defaults struct Source
     id::Int
     realtime_start::Date
     realtime_end::Date
     name::String
-    link::String
+    link::Union{Nothing,String} = nothing
+    notes::Union{Nothing,String} = nothing
 end
 
 struct SourcesResponse
+    realtime_start::Date
+    realtime_end::Date
+    order_by::String
+    sort_order::String
+    count::Int
+    offset::Int
+    limit::Int
+    sources::Vector{Source}
+end
+
+struct SimpleSourcesResponse
     realtime_start::Date
     realtime_end::Date
     sources::Vector{Source}

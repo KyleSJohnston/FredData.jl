@@ -41,8 +41,7 @@ function get_all(;
         push!(query, "sort_order" => sort_order)  # TODO: validate
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/releases"; query)
-    releases_response = JSON.parse(http_response.body, ReleasesResponse)
-    return releases_response
+    return JSON.parse(http_response.body, ReleasesResponse)
 end
 
 function dates(;
@@ -81,8 +80,7 @@ function dates(;
         push!(query, "include_release_dates_with_no_data" => include_release_dates_with_no_data)
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/releases/dates"; query)
-    release_dates_response = JSON.parse(http_response.body, ReleaseDatesResponse{NamedReleaseDate})
-    return release_dates_response
+    return JSON.parse(http_response.body, ReleaseDatesResponse{NamedReleaseDate})
 end
 
 end  # module
@@ -97,7 +95,7 @@ using JSON
 using ..APIKey
 using ..Responses: Release, NamedReleaseDate, ReleaseDate,
     ReleaseDatesResponse, ReleaseResponse, SeriesResponse,
-    SourcesResponse, TableResponse, TagsResponse
+    SimpleSourcesResponse, TableResponse, TagsResponse
 
 public get, dates, series, sources, tags, related_tags, tables
 
@@ -233,7 +231,7 @@ function sources(
         push!(query, "realtime_end" => string(realtime_end))
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/release/sources"; query)
-    sources_response = JSON.parse(http_response.body, SourcesResponse)
+    sources_response = JSON.parse(http_response.body, SimpleSourcesResponse)
     return sources_response
 end
 

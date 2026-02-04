@@ -172,4 +172,12 @@ end
     @test vdr.count == length(vdr.vintage_dates)
 end
 
+@testset "Sources Endpoints" begin
+    sr = FredData.sources.get_all()
+    @test sr isa SourcesResponse
+    @test sr.count < 1000
+    @test sr.offset == 0
+    @test sr.count == length(sr.sources)
+end
+
 nothing
