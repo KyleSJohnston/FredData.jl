@@ -1,6 +1,6 @@
 module series
 
-using Dates: Date, DateTime
+using Dates: Date, @dateformat_str, DateTime, format
 using HTTP
 using JSON
 using StructUtils
@@ -8,7 +8,7 @@ using StructUtils
 using ..APIKey
 using ..FredData: FRED_DATE_FORMAT
 using ..Responses: CategoryResponse, ObservationsResponse, ReleaseResponse,
-    SeriesResponse, SingleSeriesResponse, TagsResponse
+    SeriesResponse, SingleSeriesResponse, TagsResponse, VintageDatesResponse
 
 # TODO: public declarations
 
@@ -158,7 +158,7 @@ function search(
     filter_value::Union{Nothing,AbstractString}=nothing,
     tag_names::AbstractVector{<:AbstractString}=String[],
     exclude_tag_names::AbstractVector{<:AbstractString}=String[],
-)   
+)
     query = [
         "api_key" => APIKey.get(api_key),
         "file_type" => "json",
@@ -213,7 +213,7 @@ function search_tags(
     offset::Union{Nothing,Integer}=nothing,
     order_by::Union{Nothing,AbstractString}=nothing,
     sort_order::Union{Nothing,AbstractString}=nothing,
-)   
+)
     query = [
         "api_key" => APIKey.get(api_key),
         "file_type" => "json",
@@ -263,7 +263,7 @@ function search_related_tags(
     offset::Union{Nothing,Integer}=nothing,
     order_by::Union{Nothing,AbstractString}=nothing,
     sort_order::Union{Nothing,AbstractString}=nothing,
-)   
+)
     query = [
         "api_key" => APIKey.get(api_key),
         "file_type" => "json",
@@ -299,6 +299,116 @@ function search_related_tags(
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/series/search/related_tags"; query)
     return JSON.parse(http_response.body, TagsResponse)
+end
+
+function tags(
+    series_id::AbstractString;
+    api_key::Union{Nothing,AbstractString}=nothing,
+    realtime_start::Union{Nothing,Date}=nothing,
+    realtime_end::Union{Nothing,Date}=nothing,
+    order_by::Union{Nothing,AbstractString}=nothing,
+    sort_order::Union{Nothing,AbstractString}=nothing,
+)
+    query = [
+        "api_key" => APIKey.get(api_key),
+        "file_type" => "json",
+        "series_id" => series_id,
+    ]
+    if !isnothing(realtime_start)
+        push!(query, "realtime_start" => string(realtime_start))
+    end
+    if !isnothing(realtime_end)
+        push!(query, "realtime_end" => string(realtime_end))
+    end
+    if !isnothing(order_by)
+        push!(query, "order_by" => order_by)  # TODO: validate
+    end
+    if !isnothing(sort_order)
+        push!(query, "sort_order" => sort_order)  # TODO: validate
+    end
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/tags"; query)
+    return JSON.parse(http_response.body, TagsResponse)
+end
+
+const TIME_FORMAT = dateformat"yyyymmddHHMM"
+
+function updates(;
+    api_key::Union{Nothing,AbstractString}=nothing,
+    realtime_start::Union{Nothing,Date}=nothing,
+    realtime_end::Union{Nothing,Date}=nothing,
+    limit::Union{Nothing,Integer}=nothing,
+    offset::Union{Nothing,Integer}=nothing,
+    filter_value::Union{Nothing,AbstractString}=nothing,
+    start_time::Union{Nothing,DateTime}=nothing,
+    end_time::Union{Nothing,DateTime}=nothing,
+)
+    query = [
+        "api_key" => APIKey.get(api_key),
+        "file_type" => "json",
+    ]
+    if !isnothing(realtime_start)
+        push!(query, "realtime_start" => string(realtime_start))
+    end
+    if !isnothing(realtime_end)
+        push!(query, "realtime_end" => string(realtime_end))
+    end
+    if !isnothing(limit)
+        push!(query, "limit" => limit)  # TODO: validate
+    end
+    if !isnothing(offset)
+        push!(query, "offset" => offset)  # TODO: validate
+    end
+    if !isnothing(filter_value)
+        push!(query, "filter_value" => filter_value)
+    end
+    if !isnothing(start_time) && !isnothing(end_time)
+        if start_time <= end_time
+            # set both
+            push!(query, "start_time" => format(start_time, TIME_FORMAT))
+            push!(query, "end_time" => format(end_time, TIME_FORMAT))
+        else
+            throw(ArgumentError("start_time cannot be later than end_time"))
+        end
+    elseif !isnothing(start_time)
+        throw(ArgumentError("end_time must be set if using start_time"))
+    elseif !isnothing(end_time)
+        throw(ArgumentError("start_time must be set if using end_time"))
+    end
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/updates"; query)
+    return JSON.parse(http_response.body, SeriesResponse)
+end
+
+function vintagedates(
+    series_id::AbstractString;
+    api_key::Union{Nothing,AbstractString}=nothing,
+    realtime_start::Union{Nothing,Date}=nothing,
+    realtime_end::Union{Nothing,Date}=nothing,
+    limit::Union{Nothing,Integer}=nothing,
+    offset::Union{Nothing,Integer}=nothing,
+    sort_order::Union{Nothing,AbstractString}=nothing,
+)
+    query = [
+        "api_key" => APIKey.get(api_key),
+        "file_type" => "json",
+        "series_id" => series_id,
+    ]
+    if !isnothing(realtime_start)
+        push!(query, "realtime_start" => string(realtime_start))
+    end
+    if !isnothing(realtime_end)
+        push!(query, "realtime_end" => string(realtime_end))
+    end
+    if !isnothing(limit)
+        push!(query, "limit" => limit)  # TODO: validate
+    end
+    if !isnothing(offset)
+        push!(query, "offset" => offset)  # TODO: validate
+    end
+    if !isnothing(sort_order)
+        push!(query, "sort_order" => sort_order)  # TODO: validate
+    end
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/vintagedates"; query)
+    return JSON.parse(http_response.body, VintageDatesResponse)
 end
 
 end  # module

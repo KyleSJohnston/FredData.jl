@@ -8,11 +8,11 @@ export Category, CategoryResponse
 export Observation, ObservationsResponse
 export Release, ReleaseResponse, ReleasesResponse
 export ReleaseDate, NamedReleaseDate, ReleaseDatesResponse
-export Series, SeriesResponse
-export SingleSeries, SingleSeriesResponse
+export Series, SeriesResponse, SingleSeriesResponse
 export Source, SourcesResponse
 export TableElement, TableResponse
 export Tag, TagsResponse
+export VintageDatesResponse
 
 struct Category
     id::Int
@@ -109,7 +109,7 @@ struct ReleaseResponse
 end
 
 
-@tags struct Series
+@defaults struct Series
     id::String
     realtime_start::Date
     realtime_end::Date
@@ -124,8 +124,8 @@ end
     seasonal_adjustment_short::String
     last_updated::DateTime &(json=(dateformat=FRED_DATE_FORMAT,),)
     popularity::Int
-    group_popularity::Int
-    notes::String
+    group_popularity::Union{Nothing,Int} = nothing
+    notes::Union{Nothing,String} = nothing
 end
 
 struct SeriesResponse
@@ -139,28 +139,10 @@ struct SeriesResponse
     seriess::Vector{Series}
 end
 
-@tags struct SingleSeries
-    id::String
-    realtime_start::Date
-    realtime_end::Date
-    title::String
-    observation_start::Date
-    observation_end::Date
-    frequency::String
-    frequency_short::String
-    units::String
-    units_short::String
-    seasonal_adjustment::String
-    seasonal_adjustment_short::String
-    last_updated::DateTime &(json=(dateformat=FRED_DATE_FORMAT,),)
-    popularity::Int  # no group_popularity
-    notes::String
-end
-
 struct SingleSeriesResponse
     realtime_start::Date
     realtime_end::Date
-    seriess::Vector{SingleSeries}
+    seriess::Vector{Series}
 end
 
 struct Source
@@ -214,6 +196,17 @@ struct TagsResponse
     offset::Int
     limit::Int
     tags::Vector{Tag}
+end
+
+struct VintageDatesResponse
+    realtime_start::Date
+    realtime_end::Date
+    order_by::String
+    sort_order::String
+    count::Int
+    offset::Int
+    limit::Int
+    vintage_dates::Vector{Date}
 end
 
 end  # module

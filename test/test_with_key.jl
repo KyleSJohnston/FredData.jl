@@ -115,7 +115,7 @@ end
     sr = FredData.series.get("GNPCA")
     @test sr isa SingleSeriesResponse
     s = only(sr.seriess)
-    @test s isa SingleSeries
+    @test s isa Series
     @test s.id == "GNPCA"
 
     cr = FredData.series.categories("EXJPUS")
@@ -156,6 +156,20 @@ end
     @test tr isa TagsResponse
     @test tr.count < 1000
     @test tr.count == length(tr.tags)
+
+    tr = FredData.series.tags("STLFSI")
+    @test tr isa TagsResponse
+    @test tr.count == length(tr.tags)
+
+    sr = FredData.series.updates()
+    @test sr isa SeriesResponse
+    @test sr.count > 100
+    @test sr.limit == 1000
+    @test length(sr.seriess) == 1000
+
+    vdr = FredData.series.vintagedates("GNPCA")
+    @test vdr isa VintageDatesResponse
+    @test vdr.count == length(vdr.vintage_dates)
 end
 
 nothing

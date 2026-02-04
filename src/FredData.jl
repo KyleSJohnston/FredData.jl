@@ -207,11 +207,11 @@ export Category, CategoryResponse
 export Observation, ObservationsResponse
 export Release, ReleaseResponse, ReleasesResponse
 export ReleaseDate, NamedReleaseDate, ReleaseDatesResponse
-export Series, SeriesResponse
-export SingleSeries, SingleSeriesResponse
+export Series, SeriesResponse, SingleSeriesResponse
 export Source, SourcesResponse
 export TableElement, TableResponse
 export Tag, TagsResponse
+export VintageDatesResponse
 
 # endpoints
 public category, release, releases, series, sources, tags
