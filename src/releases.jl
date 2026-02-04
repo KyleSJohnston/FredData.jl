@@ -197,6 +197,9 @@ function series(
     if !isnothing(filter_variable)
         push!(query, "filter_variable" => filter_variable)  # TODO: validate
     end
+    if !isnothing(filter_value)
+        push!(query, "filter_value" => filter_value)
+    end
     if length(tag_names) > 0
         push!(query, "tag_names" => join(tag_names, ';'))  # TODO: maybe validate
     end

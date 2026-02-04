@@ -113,9 +113,9 @@ end
 
 @testset "Series Endpoints" begin
     sr = FredData.series.get("GNPCA")
-    @test sr isa FredData.series.SeriesResponse
+    @test sr isa SingleSeriesResponse
     s = only(sr.seriess)
-    @test s isa FredData.series.Series
+    @test s isa SingleSeries
     @test s.id == "GNPCA"
 
     cr = FredData.series.categories("EXJPUS")
@@ -129,6 +129,22 @@ end
     for o in or.observations
         @test o.realtime_start == or.realtime_start
         @test o.realtime_end == or.realtime_end
+    end
+
+    rr = FredData.series.release("IRA")
+    @test rr isa ReleaseResponse
+    for r in rr.releases
+        @test r.realtime_start == rr.realtime_start
+        @test r.realtime_end == rr.realtime_end
+    end
+
+    sr = FredData.series.search("monetary service index")
+    @test sr isa SeriesResponse
+    @test sr.count < 1000
+    @test sr.count == length(sr.seriess)
+    for s in sr.seriess
+        @test s.realtime_start == sr.realtime_start
+        @test s.realtime_end == sr.realtime_end
     end
 end
 

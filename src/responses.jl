@@ -9,6 +9,7 @@ export Observation, ObservationsResponse
 export Release, ReleaseResponse, ReleasesResponse
 export ReleaseDate, NamedReleaseDate, ReleaseDatesResponse
 export Series, SeriesResponse
+export SingleSeries, SingleSeriesResponse
 export Source, SourcesResponse
 export TableElement, TableResponse
 export Tag, TagsResponse
@@ -136,6 +137,30 @@ struct SeriesResponse
     offset::Int
     limit::Int
     seriess::Vector{Series}
+end
+
+@tags struct SingleSeries
+    id::String
+    realtime_start::Date
+    realtime_end::Date
+    title::String
+    observation_start::Date
+    observation_end::Date
+    frequency::String
+    frequency_short::String
+    units::String
+    units_short::String
+    seasonal_adjustment::String
+    seasonal_adjustment_short::String
+    last_updated::DateTime &(json=(dateformat=FRED_DATE_FORMAT,),)
+    popularity::Int  # no group_popularity
+    notes::String
+end
+
+struct SingleSeriesResponse
+    realtime_start::Date
+    realtime_end::Date
+    seriess::Vector{SingleSeries}
 end
 
 struct Source

@@ -7,33 +7,11 @@ using StructUtils
 
 using ..APIKey
 using ..FredData: FRED_DATE_FORMAT
-using ..Responses: CategoryResponse, ObservationsResponse
+using ..Responses: CategoryResponse, ObservationsResponse, ReleaseResponse,
+    SeriesResponse, SingleSeriesResponse
 
 export series
 
-@tags struct Series
-    id::String
-    realtime_start::Date
-    realtime_end::Date
-    title::String
-    observation_start::Date
-    observation_end::Date
-    frequency::String
-    frequency_short::String
-    units::String
-    units_short::String
-    seasonal_adjustment::String
-    seasonal_adjustment_short::String
-    last_updated::DateTime &(json=(dateformat=FRED_DATE_FORMAT,),)
-    popularity::Int  # no group_popularity
-    notes::String
-end
-
-struct SeriesResponse
-    realtime_start::Date
-    realtime_end::Date
-    seriess::Vector{Series}
-end
 
 function get(
     series_id::AbstractString;
@@ -53,7 +31,7 @@ function get(
         push!(query, "realtime_end" => string(realtime_end))
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/series"; query)
-    return JSON.parse(http_response.body, SeriesResponse)
+    return JSON.parse(http_response.body, SingleSeriesResponse)
 end
 
 function categories(
@@ -143,6 +121,84 @@ function observations(
     end
     http_response = HTTP.get("https://api.stlouisfed.org/fred/series/observations"; query)
     return JSON.parse(http_response.body, ObservationsResponse)
+end
+
+function release(
+    series_id::AbstractString;
+    api_key::Union{Nothing,AbstractString}=nothing,
+    realtime_start::Union{Nothing,Date}=nothing,
+    realtime_end::Union{Nothing,Date}=nothing,
+)
+    query = [
+        "api_key" => APIKey.get(api_key),
+        "file_type" => "json",
+        "series_id" => string(series_id),
+    ]
+    if !isnothing(realtime_start)
+        push!(query, "realtime_start" => string(realtime_start))
+    end
+    if !isnothing(realtime_end)
+        push!(query, "realtime_end" => string(realtime_end))
+    end
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/release"; query)
+    return JSON.parse(http_response.body, ReleaseResponse)
+end
+
+function search(
+    search_text::AbstractString;
+    api_key::Union{Nothing,AbstractString}=nothing,
+    search_type::Union{Nothing,AbstractString}=nothing,
+    realtime_start::Union{Nothing,Date}=nothing,
+    realtime_end::Union{Nothing,Date}=nothing,
+    limit::Union{Nothing,Integer}=nothing,
+    offset::Union{Nothing,Integer}=nothing,
+    order_by::Union{Nothing,AbstractString}=nothing,
+    sort_order::Union{Nothing,AbstractString}=nothing,
+    filter_variable::Union{Nothing,AbstractString}=nothing,
+    filter_value::Union{Nothing,AbstractString}=nothing,
+    tag_names::AbstractVector{<:AbstractString}=String[],
+    exclude_tag_names::AbstractVector{<:AbstractString}=String[],
+)   
+    query = [
+        "api_key" => APIKey.get(api_key),
+        "file_type" => "json",
+        "search_text" => search_text,
+    ]
+    if !isnothing(search_type)
+        push!(query, "search_type" => string(search_type))  # TODO: validate
+    end
+    if !isnothing(realtime_start)
+        push!(query, "realtime_start" => string(realtime_start))
+    end
+    if !isnothing(realtime_end)
+        push!(query, "realtime_end" => string(realtime_end))
+    end
+    if !isnothing(limit)
+        push!(query, "limit" => limit)  # TODO: validate
+    end
+    if !isnothing(offset)
+        push!(query, "offset" => offset)  # TODO: validate
+    end
+    if !isnothing(order_by)
+        push!(query, "order_by" => order_by)  # TODO: validate
+    end
+    if !isnothing(sort_order)
+        push!(query, "sort_order" => sort_order)  # TODO: validate
+    end
+    if !isnothing(filter_variable)
+        push!(query, "filter_variable" => filter_variable)  # TODO: validate
+    end
+    if !isnothing(filter_value)
+        push!(query, "filter_value" => filter_value)
+    end
+    if length(tag_names) > 0
+        push!(query, "tag_names" => join(tag_names, ';'))  # TODO: maybe validate
+    end
+    if length(exclude_tag_names) > 0
+        push!(query, "exclude_tag_names" => join(exclude_tag_names, ';'))  # TODO: maybe validate
+    end
+    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/search"; query)
+    return JSON.parse(http_response.body, SeriesResponse)
 end
 
 end  # module
