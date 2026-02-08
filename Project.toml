@@ -15,7 +15,7 @@ TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 [compat]
 DataFrames = "1.8"
 Dates = "1"
-HTTP = "1.10.19"
+HTTP = "1.10"
 JSON = "1.0.1"
 Printf = "1"
 StructUtils = "2.3"
