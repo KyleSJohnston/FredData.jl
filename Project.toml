@@ -12,11 +12,11 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 
 [compat]
-DataFrames = "0.18, 0.19, 0.20, 0.21, 0.22, 1"
-HTTP = "0.8, 0.9, 1.2"
+DataFrames = "1.7.1"
+HTTP = "1.10.19"
 JSON = "0.18, 0.19, 0.20, 0.21"
-TimeZones = "0.11, 1"
-julia = "1"
+TimeZones = "1.22.2"
+julia = "1.9"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
