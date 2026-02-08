@@ -9,12 +9,14 @@ Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+StructUtils = "ec057cc2-7a8d-4b58-b3b3-92acb9f63b42"
 TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 
 [compat]
 DataFrames = "1.7.1"
 HTTP = "1.10.19"
-JSON = "0.18, 0.19, 0.20, 0.21"
+JSON = "1.0.1"
+StructUtils = "2.6.2"
 TimeZones = "1.22.2"
 julia = "1.9"
 
