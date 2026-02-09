@@ -123,6 +123,16 @@ function parse_observations(obs::Vector)
                      date=date, value=value)
 end
 
+# There are some differences between the validation in `Validation` and in
+# `validate_args!`. For example, `Validation` expects typed values, whereas
+# `validate_args!` expects stringified values.
+# At some point, `get_data` is likely to call an underlying function for the
+# observations and another function for the series. Those functions will be
+# expected to do the validation, so rather than clutter the global namespace
+# with everything `Validation` exports, `validate_args!` uses qualified names
+# for specific purposes.
+using ..Validation: Validation
+
 # Make sure everything is of the right format.
 # kwargs is a vector of Tuple{Symbol, Any}.
 isyyyymmdd(x) = occursin(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$", x)
@@ -136,27 +146,30 @@ function validate_args!(kwargs)
         end
     end
     # limit and offset
-    for k in [:limit, :offset]
-        if (v = pop!(d, k, nothing)) != nothing &&
-            ( !(typeof(v) <: Number ) || typeof(v) <: Number && !(v>0) )
-                error("$k: Invalid format: $v")
-        end
+    if haskey(d, :limit)
+        v = pop!(d, :limit)
+        isnothing(v) || Validation.validate_limit(v; ubound=100_000)
+    end
+    if haskey(d, :offset)
+        v = pop!(d, :offset)
+        isnothing(v) || Validation.validate_offset(v)
     end
     # units
-    if (v = pop!(d, :units, nothing)) != nothing &&
-        v ∉ ["lin", "chg", "ch1", "pch", "pc1", "pca", "cch", "log"]
-            error("units: Invalid format: $v")
+    if haskey(d, :units)
+        v = pop!(d, :units)
+        # "cca" is supported now.
+        # Close https://github.com/micahjsmith/FredData.jl/pull/25 upon release.
+        isnothing(v) || Validation.validate_units(v)
     end
     # frequency
-    if (v = pop!(d, :frequency, nothing)) != nothing &&
-        v ∉ ["d", "w", "bw", "m", "q", "sa", "a", "wef", "weth", "wew", "wetu", "wem",
-             "wesu", "wesa", "bwew", "bwem"]
-            error("frequency: Invalid format: $v")
+    if haskey(d, :frequency)
+        v = pop!(d, :frequency)
+        isnothing(v) || Validation.validate_frequency(v)
     end
     # aggregation_method
-    if (v = pop!(d, :aggregation_method, nothing)) != nothing &&
-        v ∉ ["avg", "sum", "eop"]
-            error("aggregation_method: Invalid format: $v")
+    if haskey(d, :aggregation_method)
+        v = pop!(d, :aggregation_method)
+        isnothing(v) || Validation.validate_aggregation_method(v)
     end
     # output_type
     if (v = pop!(d, :output_type, nothing)) != nothing &&
