@@ -5,8 +5,8 @@ on:
       - main
     tags: ['*']
   pull_request:
-    branches:
-      - main
+    # branches:
+      # - main  # TODO: restore upon final merge
   schedule:
     - cron: '0 0 * * 1'
   workflow_dispatch:
@@ -36,6 +36,9 @@ jobs:
           - ubuntu-latest
         arch:
           - x64
+        include:
+          - version: '1.12'
+            api_key: ${{ secrets.FRED_API_KEY }}  # only place requests on 1.12
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
@@ -44,6 +47,7 @@ jobs:
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-runtest@v1
+      - if: ${{ matrix.api_key }}
         env:
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          FRED_API_KEY: ${{ matrix.api_key }}
+      - uses: julia-actions/julia-runtest@v1
