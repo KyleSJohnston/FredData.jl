@@ -146,25 +146,22 @@ The following fields are available:
 """
 struct FredSeries
     # From series query
-    id::AbstractString
-    title::AbstractString
-    units_short::AbstractString
-    units::AbstractString
-    seas_adj_short::AbstractString
-    seas_adj::AbstractString
-    freq_short::AbstractString
-    freq::AbstractString
-    realtime_start::AbstractString
-    realtime_end::AbstractString
+    id::String
+    title::String
+    units_short::String
+    units::String
+    seas_adj_short::String
+    seas_adj::String
+    freq_short::String
+    freq::String
+    realtime_start::Date
+    realtime_end::Date
     last_updated::DateTime
-    notes::AbstractString
+    notes::String
 
     # From series/observations query
-    trans_short::AbstractString # "units"
+    trans_short::String # "units"
     data::DataFrames.DataFrame
-
-    # deprecated
-    df::DataFrames.DataFrame
 end
 
 function Base.show(io::IO, s::FredSeries)
@@ -202,8 +199,6 @@ export
 @deprecate trans_short(f::FredSeries) getfield(f, :trans_short)
 @deprecate df(f::FredSeries) getfield(f, :data)
 
-include("get_data.jl")
-
 # Export response objects for users
 using .Responses
 export Category, CategoryResponse
@@ -218,5 +213,7 @@ export VintageDatesResponse
 
 # Make fully-qualified endpoint functions available
 @compat public category, release, releases, series, source, tags
+
+include("get_data.jl")
 
 end # module

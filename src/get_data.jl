@@ -1,3 +1,17 @@
+using .series: get as series_func, observations as observations_func
+
+function formatnotes(notes::String)
+    return strip(
+        replace(
+            replace(
+                notes,
+                r"[\r\n]" => " ",
+            ),
+            r" +" => " ",
+        )
+    )
+end
+
 """
 ```
 get_data(f::Fred, series::AbstractString; kwargs...)
@@ -29,171 +43,52 @@ Request one series using the FRED API.
   only), `4` (observations, initial release only)
 - `vintage_dates`: vintage dates as comma-separated YYYY-MM-DD strings
 """
-function get_data(f::Fred, series::AbstractString; kwargs...)
-    # Validation
-    validate_args!(kwargs)
-
-    # Setup
-    metadata_url = joinpath(get_api_url(f), "series")
-    obs_url      = joinpath(get_api_url(f), "series", "observations")
-    api_key      = get_api_key(f)
-
-    # Add query parameters
-    metadata_params = Dict("api_key"   => api_key,
-                           "file_type" => "json",
-                           "series_id" => series)
-    obs_params = copy(metadata_params)
-
+function get_data(::Fred, series::AbstractString; kwargs...)
     # Query observations. Expand query dict with kwargs. Do this first so we can use the
     # calculated realtime values for the metadata request.
-    for (key, value) in kwargs
-        obs_params[string(key)] = string(value)
-    end
-    obs_response = HTTP.request("GET", obs_url, []; query=obs_params)
-    obs_json = JSON.parse(String(copy(obs_response.body)))
-
-    # Parse observations
-    realtime_start  = obs_json["realtime_start"]
-    realtime_end    = obs_json["realtime_end"]
-    transformation_short = obs_json["units"]
-
-    df = parse_observations(obs_json["observations"])
+    obs = observations_func(series; kwargs...)::ObservationsResponse
+    df = parse_observations(obs)
 
     # Query metadata
-    metadata_params["realtime_start"] = realtime_start
-    metadata_params["realtime_end"] = realtime_end
-    metadata_response = HTTP.request("GET", metadata_url, []; query=metadata_params)
-    metadata_json = JSON.parse(String(copy(metadata_response.body)))
+    meta = series_func(
+        series;
+        realtime_start=obs.realtime_start,
+        realtime_end=obs.realtime_end,
+    )::SimpleSeriesResponse
+    s = first(meta.seriess)
     # TODO catch StatusError and just return incomplete data to the caller
 
-    # Parse metadata
-    metadata_parsed = Dict{Symbol, AbstractString}()
-    for k in ["id", "title", "units_short", "units", "seasonal_adjustment_short",
-        "seasonal_adjustment", "frequency_short", "frequency", "notes"]
-        try
-            metadata_parsed[Symbol(k)] = metadata_json["seriess"][1][k]
-        catch err
-            metadata_parsed[Symbol(k)] = ""
-            @warn("Metadata '$k' not returned from server.")
-        end
-    end
-
-    function parse_last_updated(last_updated)
-        return DateTime(ZonedDateTime(last_updated, FRED_DATE_FORMAT), OUTPUT_TZ_TYPE)
-    end
-    last_updated = parse_last_updated(
-        metadata_json["seriess"][1]["last_updated"])
-
-    # format notes field
-    metadata_parsed[:notes] = strip(replace(replace(
-        metadata_parsed[:notes], r"[\r\n]" => " "), r" +" => " "))
-
-    return FredSeries(metadata_parsed[:id], metadata_parsed[:title],
-                      metadata_parsed[:units_short], metadata_parsed[:units],
-                      metadata_parsed[:seasonal_adjustment_short],
-                      metadata_parsed[:seasonal_adjustment],
-                      metadata_parsed[:frequency_short], metadata_parsed[:frequency],
-                      realtime_start, realtime_end, last_updated, metadata_parsed[:notes],
-                      transformation_short, df,
-                      df) # deprecated
+    return FredSeries(
+        s.id,
+        s.title,
+        s.units_short,
+        s.units,
+        s.seasonal_adjustment_short,
+        s.seasonal_adjustment,
+        s.frequency_short,
+        s.frequency,
+        obs.realtime_start,
+        obs.realtime_end,
+        s.last_updated,
+        formatnotes(s.notes),
+        obs.units,
+        df,
+    )
 end
 
-# obs is a vector, of which each element is a dict with four fields,
-# - realtime_start
-# - realtime_end
-# - date
-# - value
-function parse_observations(obs::Vector)
-    n_obs = length(obs)
-    value = Vector{Float64}(undef, n_obs)
-    date  = Vector{Date}(undef, n_obs)
-    realtime_start = Vector{Date}(undef, n_obs)
-    realtime_end = Vector{Date}(undef, n_obs)
-    for (i, x) in enumerate(obs)
-        try
-            value[i] = parse(Float64, x["value"])
-        catch err
-            value[i] = NaN
-        end
-        date[i]           = Date(x["date"], "yyyy-mm-dd")
-        realtime_start[i] = Date(x["realtime_start"], "yyyy-mm-dd")
-        realtime_end[i]   = Date(x["realtime_end"], "yyyy-mm-dd")
-    end
-    return DataFrame(realtime_start=realtime_start, realtime_end=realtime_end,
-                     date=date, value=value)
-end
+parsefloat(x::AbstractString) = something(tryparse(Float64, x), NaN)
 
-# There are some differences between the validation in `Validation` and in
-# `validate_args!`. For example, `Validation` expects typed values, whereas
-# `validate_args!` expects stringified values.
-# At some point, `get_data` is likely to call an underlying function for the
-# observations and another function for the series. Those functions will be
-# expected to do the validation, so rather than clutter the global namespace
-# with everything `Validation` exports, `validate_args!` uses qualified names
-# for specific purposes.
-using ..Validation: Validation
-
-# Make sure everything is of the right format.
-# kwargs is a vector of Tuple{Symbol, Any}.
-isyyyymmdd(x) = occursin(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$", x)
-function validate_args!(kwargs)
-    d = Dict(kwargs)
-
-    # dates
-    for k in [:realtime_start, :realtime_end, :observation_start, :observation_end]
-        if (v = pop!(d, k, nothing)) != nothing && !isyyyymmdd(v)
-                error("$k: Invalid date format: $v")
-        end
-    end
-    # limit and offset
-    if haskey(d, :limit)
-        v = pop!(d, :limit)
-        isnothing(v) || Validation.validate_limit(v; ubound=100_000)
-    end
-    if haskey(d, :offset)
-        v = pop!(d, :offset)
-        isnothing(v) || Validation.validate_offset(v)
-    end
-    # units
-    if haskey(d, :units)
-        v = pop!(d, :units)
-        # "cca" is supported now.
-        # Close https://github.com/micahjsmith/FredData.jl/pull/25 upon release.
-        isnothing(v) || Validation.validate_units(v)
-    end
-    # frequency
-    if haskey(d, :frequency)
-        v = pop!(d, :frequency)
-        isnothing(v) || Validation.validate_frequency(v)
-    end
-    # aggregation_method
-    if haskey(d, :aggregation_method)
-        v = pop!(d, :aggregation_method)
-        isnothing(v) || Validation.validate_aggregation_method(v)
-    end
-    # output_type
-    if (v = pop!(d, :output_type, nothing)) != nothing &&
-        v ∉ [1, 2, 3, 4]
-            error("output_type: Invalid format: $v")
-    end
-    # vintage dates, and too early vintages
-    if (v = pop!(d, :vintage_dates, nothing)) != nothing
-        vds_arr = split(string(v), ",")
-        vds_bad = map(x -> !isyyyymmdd(x), vds_arr)
-        if any(vds_bad)
-            error("vintage_dates: Invalid date format: $(vds_arr[vds_bad])")
-        end
-        vds_early = map(x -> x<EARLY_VINTAGE_DATE, vds_arr)
-        if any(vds_early)
-            @warn(:vintage_dates, ": Early vintage date, data might not exist: ",
-                vds_arr[vds_early])
-        end
-    end
-    # all remaining keys have unspecified behavior
-    if length(d) > 0
-        for k in keys(d)
-            @warn(string(k), ": Bad key. Removed from query.")
-            deleteat!(kwargs, findall(x -> x[1]==k, kwargs))
-        end
-    end
+function parse_observations(obs::ObservationsResponse)
+    df = DataFrame(obs.observations)
+    df[!, :value] = parsefloat.(df[!, :value])
+    metadata!(df, "realtime_start", obs.realtime_start)
+    metadata!(df, "realtime_end", obs.realtime_end)
+    metadata!(df, "observation_start", obs.observation_start)
+    metadata!(df, "observation_end", obs.observation_end)
+    # TODO: consider output_type
+    metadata!(df, "order_by", obs.order_by)
+    metadata!(df, "sort_order", obs.sort_order)
+    metadata!(df, "limit", obs.limit)
+    colmetadata!(df, :value, "units", obs.units)
+    return df
 end
