@@ -12,6 +12,8 @@ function formatnotes(notes::String)
     )
 end
 
+# TODO: consider f::Fred argument
+# TODO: revise docstring
 """
 ```
 get_data(f::Fred, series::AbstractString; kwargs...)
