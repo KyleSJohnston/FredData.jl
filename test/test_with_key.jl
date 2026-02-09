@@ -1,3 +1,4 @@
+using Dates: Date
 using FredData
 using Test
 
@@ -21,8 +22,8 @@ end
 
 @testset "Consistent responses from specific vintages" begin
     f = Fred()
-    vintage_dates = "2015-01-01"
-    s = get_data(f, "GDPC1"; units="chg", vintage_dates=vintage_dates)
+    vintage_dates = Date(2015)
+    s = get_data(f, "GDPC1"; units="chg", vintage_dates=[vintage_dates])
     @test size(s.data) == (271, 4)
     @test s.realtime_start == vintage_dates
     @test s.realtime_end == vintage_dates
