@@ -89,6 +89,11 @@ end
 include("validation.jl")
 include("responses.jl")
 
+include("category.jl")
+include("release.jl")
+include("source.jl")
+include("tags.jl")
+
 # Fred connection type
 """
 A connection to the Fred API.
