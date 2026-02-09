@@ -5,7 +5,7 @@ using Dates: Date, DateTime
 using HTTP
 using JSON
 
-using ..FredData: get_api_key
+using ..FredData: API_URL, get_api_key
 using ..Responses: ReleasesResponse, NamedReleaseDate, ReleaseDatesResponse
 using ..Validation
 
@@ -56,7 +56,7 @@ function get_all(;
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/releases"; query)
+    http_response = HTTP.get(joinpath(API_URL, "releases"); query)
     return JSON.parse(http_response.body, ReleasesResponse)
 end
 
@@ -107,7 +107,7 @@ function dates(;
     if !isnothing(include_release_dates_with_no_data)
         push!(query, "include_release_dates_with_no_data" => string(include_release_dates_with_no_data))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/releases/dates"; query)
+    http_response = HTTP.get(joinpath(API_URL, "releases", "dates"); query)
     return JSON.parse(http_response.body, ReleaseDatesResponse{NamedReleaseDate})
 end
 
@@ -121,7 +121,7 @@ using Dates: Date, DateTime
 using HTTP
 using JSON
 
-using ..FredData: get_api_key
+using ..FredData: API_URL, get_api_key
 using ..Responses: Release, NamedReleaseDate, ReleaseDate,
     ReleaseDatesResponse, SimpleReleasesResponse, SeriesResponse,
     SimpleSourcesResponse, TableResponse, TagsResponse
@@ -153,7 +153,7 @@ function get(
     if !isnothing(realtime_end)
         push!(query, "realtime_end" => string(realtime_end))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/release"; query)
+    http_response = HTTP.get(joinpath(API_URL, "release"); query)
     return JSON.parse(http_response.body, SimpleReleasesResponse)
 end
 
@@ -197,7 +197,7 @@ function dates(
     if !isnothing(include_release_dates_with_no_data)
         push!(query, "include_release_dates_with_no_data" => string(include_release_dates_with_no_data))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/release/dates"; query)
+    http_response = HTTP.get(joinpath(API_URL, "release", "dates"); query)
     return JSON.parse(http_response.body, ReleaseDatesResponse{ReleaseDate})
 end
 
@@ -271,7 +271,7 @@ function series(
     if length(exclude_tag_names) > 0
         push!(query, "exclude_tag_names" => join(exclude_tag_names, ';'))  # TODO: maybe validate
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/release/series"; query)
+    http_response = HTTP.get(joinpath(API_URL, "release", "series"); query)
     return JSON.parse(http_response.body, SeriesResponse)
 end
 
@@ -299,7 +299,7 @@ function sources(
     if !isnothing(realtime_end)
         push!(query, "realtime_end" => string(realtime_end))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/release/sources"; query)
+    http_response = HTTP.get(joinpath(API_URL, "release", "sources"); query)
     return JSON.parse(http_response.body, SimpleSourcesResponse)
 end
 
@@ -362,7 +362,7 @@ function tags(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/release/tags"; query)
+    http_response = HTTP.get(joinpath(API_URL, "release", "tags"); query)
     return JSON.parse(http_response.body, TagsResponse)
 end
 
@@ -427,7 +427,7 @@ function related_tags(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/release/related_tags"; query)
+    http_response = HTTP.get(joinpath(API_URL, "release", "related_tags"); query)
     return JSON.parse(http_response.body, TagsResponse)
 end
 
@@ -459,7 +459,7 @@ function tables(
     if !isnothing(observation_date)
         push!(query, "observation_date" => observation_date)
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/release/tables"; query)
+    http_response = HTTP.get(joinpath(API_URL, "release", "tables"); query)
     return JSON.parse(http_response.body, TableResponse)
 
 end

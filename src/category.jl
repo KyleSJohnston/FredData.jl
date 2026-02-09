@@ -5,7 +5,7 @@ using Dates: Date, DateTime
 using HTTP
 using JSON
 
-using ..FredData: get_api_key
+using ..FredData: API_URL, get_api_key
 using ..Responses: Category, CategoryResponse, SeriesResponse, TagsResponse
 using ..Validation
 
@@ -27,7 +27,7 @@ function get(
         "file_type" => "json",
         "category_id" => category_id,
     ]
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/category"; query)
+    http_response = HTTP.get(joinpath(API_URL, "category"); query)
     return JSON.parse(http_response.body, CategoryResponse)
 end
 
@@ -55,7 +55,7 @@ function children(
     if !isnothing(realtime_end)
         push!(query, "realtime_end" => string(realtime_end))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/category/children"; query)
+    http_response = HTTP.get(joinpath(API_URL, "category", "children"); query)
     return JSON.parse(http_response.body, CategoryResponse)
 end
 
@@ -83,7 +83,7 @@ function related(
     if !isnothing(realtime_end)
         push!(query, "realtime_end" => string(realtime_end))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/category/related"; query)
+    http_response = HTTP.get(joinpath(API_URL, "category", "related"); query)
     return JSON.parse(http_response.body, CategoryResponse)
 end
 
@@ -158,7 +158,7 @@ function series(
     if length(exclude_tag_names) > 0
         push!(query, "exclude_tag_names" => join(exclude_tag_names, ';'))  # TODO: maybe validate
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/category/series"; query)
+    http_response = HTTP.get(joinpath(API_URL, "category", "series"); query)
     return JSON.parse(http_response.body, SeriesResponse)
 end
 
@@ -221,7 +221,7 @@ function tags(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/category/tags"; query)
+    http_response = HTTP.get(joinpath(API_URL, "category", "tags"); query)
     return JSON.parse(http_response.body, TagsResponse)
 end
 
@@ -286,7 +286,7 @@ function related_tags(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/category/related_tags"; query)
+    http_response = HTTP.get(joinpath(API_URL, "category", "related_tags"); query)
     return JSON.parse(http_response.body, TagsResponse)
 end
 

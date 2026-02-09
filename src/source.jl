@@ -5,7 +5,7 @@ using Dates: Date
 using HTTP
 using JSON
 
-using ..FredData: get_api_key
+using ..FredData: API_URL, get_api_key
 using ..Responses: ReleasesResponse, SimpleSourcesResponse, Source, SourcesResponse
 using ..Validation
 
@@ -55,7 +55,7 @@ function get_all(;
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/sources"; query)
+    http_response = HTTP.get(joinpath(API_URL, "sources"); query)
     return JSON.parse(http_response.body, SourcesResponse)
 end
 
@@ -83,7 +83,7 @@ function get(
     if !isnothing(realtime_end)
         push!(query, "realtime_end" => string(realtime_end))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/source"; query)
+    http_response = HTTP.get(joinpath(API_URL, "source"); query)
     return JSON.parse(http_response.body, SimpleSourcesResponse)
 end
 
@@ -134,7 +134,7 @@ function releases(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/source/releases"; query)
+    http_response = HTTP.get(joinpath(API_URL, "source", "releases"); query)
     return JSON.parse(http_response.body, ReleasesResponse)
 end
 

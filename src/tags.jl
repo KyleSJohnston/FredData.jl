@@ -5,7 +5,7 @@ using Dates: Date
 using HTTP
 using JSON
 
-using ..FredData: get_api_key
+using ..FredData: API_URL, get_api_key
 using ..Responses: SeriesResponse, TagsResponse
 using ..Validation
 
@@ -68,7 +68,7 @@ function get_all(;
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/tags"; query)
+    http_response = HTTP.get(joinpath(API_URL, "tags"); query)
     return JSON.parse(http_response.body, TagsResponse)
 end
 
@@ -131,7 +131,7 @@ function related_tags(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/related_tags"; query)
+    http_response = HTTP.get(joinpath(API_URL, "related_tags"); query)
     return JSON.parse(http_response.body, TagsResponse)
 end
 
@@ -193,7 +193,7 @@ function series(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/tags/series"; query)
+    http_response = HTTP.get(joinpath(API_URL, "tags", "series"); query)
     return JSON.parse(http_response.body, SeriesResponse)
 end
 
