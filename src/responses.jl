@@ -350,12 +350,12 @@ end
 function Base.show(io::IO, rr::SimpleReleasesResponse)
     if get(io, :compact, false)::Bool
         # compact single-line print
-        print(io, "ReleaseResponse(<", length(rr.releases), " releases>]")
+        print(io, "SimpleReleasesResponse(<", length(rr.releases), " releases>]")
     else
         # single-line print
         print(
             io,
-            "ReleaseResponse(",
+            "SimpleReleasesResponse(",
             rr.realtime_start, ", ",
             rr.realtime_end, ", <",
             length(rr.releases), " releases>)"
@@ -365,7 +365,7 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", rr::SimpleReleasesResponse)
     # multi-line print
-    println(io, "ReleaseResponse")
+    println(io, "SimpleReleasesResponse")
     println(io, "  realtime_start: ", rr.realtime_start)
     println(io, "    realtime_end: ", rr.realtime_end)
     print(io,   "        releases: ")

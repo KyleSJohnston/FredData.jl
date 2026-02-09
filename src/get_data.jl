@@ -34,8 +34,8 @@ function get_data(f::Fred, series::AbstractString; kwargs...)
     validate_args!(kwargs)
 
     # Setup
-    metadata_url = get_api_url(f) * "series"
-    obs_url      = get_api_url(f) * "series/observations"
+    metadata_url = joinpath(get_api_url(f), "series")
+    obs_url      = joinpath(get_api_url(f), "series", "observations")
     api_key      = get_api_key(f)
 
     # Add query parameters
