@@ -86,6 +86,8 @@ function __init__()
     load_fred_key()
 end
 
+include("validation.jl")
+
 # Fred connection type
 """
 A connection to the Fred API.
