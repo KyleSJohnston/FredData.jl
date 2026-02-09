@@ -37,7 +37,7 @@ function get(
     if !isnothing(realtime_end)
         push!(query, "realtime_end" => string(realtime_end))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series"; query)
+    http_response = HTTP.get(joinpath(API_URL, "series"); query)
     return JSON.parse(http_response.body, SimpleSeriesResponse)
 end
 
@@ -65,7 +65,7 @@ function categories(
     if !isnothing(realtime_end)
         push!(query, "realtime_end" => string(realtime_end))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/categories"; query)
+    http_response = HTTP.get(joinpath(API_URL, "series", "categories"); query)
     return JSON.parse(http_response.body, CategoryResponse)
 end
 
@@ -140,7 +140,7 @@ function observations(
     if length(vintage_dates) > 0
         push!(query, "vintage_dates" => join(vintage_dates, ','))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/observations"; query)
+    http_response = HTTP.get(joinpath(API_URL, "series", "observations"); query)
     return JSON.parse(http_response.body, ObservationsResponse)
 end
 
@@ -168,7 +168,7 @@ function release(
     if !isnothing(realtime_end)
         push!(query, "realtime_end" => string(realtime_end))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/release"; query)
+    http_response = HTTP.get(joinpath(API_URL, "series", "release"); query)
     return JSON.parse(http_response.body, SimpleReleasesResponse)
 end
 
@@ -247,7 +247,7 @@ function search(
     if length(exclude_tag_names) > 0
         push!(query, "exclude_tag_names" => join(exclude_tag_names, ';'))  # TODO: maybe validate
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/search"; query)
+    http_response = HTTP.get(joinpath(API_URL, "series", "search"); query)
     return JSON.parse(http_response.body, SeriesResponse)
 end
 
@@ -310,7 +310,7 @@ function search_tags(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/search/tags"; query)
+    http_response = HTTP.get(joinpath(API_URL, "series", "search", "tags"); query)
     return JSON.parse(http_response.body, TagsResponse)
 end
 
@@ -375,7 +375,7 @@ function search_related_tags(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/search/related_tags"; query)
+    http_response = HTTP.get(joinpath(API_URL, "series", "search", "related_tags"); query)
     return JSON.parse(http_response.body, TagsResponse)
 end
 
@@ -418,7 +418,7 @@ function tags(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/tags"; query)
+    http_response = HTTP.get(joinpath(API_URL, "series", "tags"); query)
     return JSON.parse(http_response.body, TagsResponse)
 end
 
@@ -471,7 +471,7 @@ function updates(;
     elseif !isnothing(end_time)
         throw(ArgumentError("start_time must be set if using end_time"))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/updates"; query)
+    http_response = HTTP.get(joinpath(API_URL, "series", "updates"); query)
     return JSON.parse(http_response.body, SeriesResponse)
 end
 
@@ -511,7 +511,7 @@ function vintagedates(
     if !isnothing(sort_order)
         push!(query, "sort_order" => validate_sort_order(sort_order))
     end
-    http_response = HTTP.get("https://api.stlouisfed.org/fred/series/vintagedates"; query)
+    http_response = HTTP.get(joinpath(API_URL, "series", "vintagedates"); query)
     return JSON.parse(http_response.body, VintageDatesResponse)
 end
 
