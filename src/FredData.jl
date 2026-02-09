@@ -87,6 +87,7 @@ function __init__()
 end
 
 include("validation.jl")
+include("responses.jl")
 
 # Fred connection type
 """
@@ -212,5 +213,17 @@ export
 @deprecate df(f::FredSeries) getfield(f, :data)
 
 include("get_data.jl")
+
+# Export response objects for users
+using .Responses
+export Category, CategoryResponse
+export Observation, ObservationsResponse
+export Release, ReleasesResponse, SimpleReleasesResponse
+export ReleaseDate, NamedReleaseDate, ReleaseDatesResponse
+export Series, SeriesResponse, SimpleSeriesResponse
+export Source, SourcesResponse, SimpleSourcesResponse
+export TableElement, TableResponse
+export Tag, TagsResponse
+export VintageDatesResponse
 
 end # module
