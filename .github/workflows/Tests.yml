@@ -38,7 +38,8 @@ jobs:
           - x64
         include:
           - version: '1.12'
-            api_key: ${{ secrets.FRED_API_KEY }}  # only place requests on 1.12
+            env:  # only place requests on 1.12
+              FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
@@ -47,7 +48,4 @@ jobs:
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
-      - if: ${{ matrix.api_key }}
-        env:
-          FRED_API_KEY: ${{ matrix.api_key }}
       - uses: julia-actions/julia-runtest@v1
