@@ -138,80 +138,80 @@ end
     @test tables_response isa TableResponse
 end
 
-# @testset "Series Endpoints" begin
-#     sr = FredData.series.get("GNPCA")
-#     @test sr isa SingleSeriesResponse
-#     doshow(sr)
-#     s = only(sr.seriess)
-#     @test s isa Series
-#     doshow(s)
-#     @test s.id == "GNPCA"
+@testset "Series Endpoints" begin
+    sr = FredData.series.get("GNPCA")
+    @test sr isa SimpleSeriesResponse
+    doshow(sr)
+    s = only(sr.seriess)
+    @test s isa Series
+    doshow(s)
+    @test s.id == "GNPCA"
 
-#     cr = FredData.series.categories("EXJPUS")
-#     @test cr isa CategoryResponse
-#     doshow(cr)
-#     @test length(cr.categories) < 10
+    cr = FredData.series.categories("EXJPUS")
+    @test cr isa CategoryResponse
+    doshow(cr)
+    @test length(cr.categories) < 10
 
-#     or = FredData.series.observations("GNPCA")
-#     @test or isa ObservationsResponse
-#     doshow(or)
-#     @test or.count < 100_000
-#     @test or.count == length(or.observations)
-#     for o in or.observations
-#         doshow(o)
-#         @test o.realtime_start == or.realtime_start
-#         @test o.realtime_end == or.realtime_end
-#     end
+    or = FredData.series.observations("GNPCA")
+    @test or isa ObservationsResponse
+    doshow(or)
+    @test or.count < 100_000
+    @test or.count == length(or.observations)
+    for o in or.observations
+        doshow(o)
+        @test o.realtime_start == or.realtime_start
+        @test o.realtime_end == or.realtime_end
+    end
 
-#     rr = FredData.series.release("IRA")
-#     @test rr isa SimpleReleasesResponse
-#     doshow(rr)
-#     for r in rr.releases
-#         doshow(r)
-#         @test r.realtime_start == rr.realtime_start
-#         @test r.realtime_end == rr.realtime_end
-#     end
+    rr = FredData.series.release("IRA")
+    @test rr isa SimpleReleasesResponse
+    doshow(rr)
+    for r in rr.releases
+        doshow(r)
+        @test r.realtime_start == rr.realtime_start
+        @test r.realtime_end == rr.realtime_end
+    end
 
-#     sr = FredData.series.search("monetary service index")
-#     @test sr isa SeriesResponse
-#     doshow(sr)
-#     @test sr.count < 1000
-#     @test sr.count == length(sr.seriess)
-#     for s in sr.seriess
-#         doshow(s)
-#         @test s.realtime_start == sr.realtime_start
-#         @test s.realtime_end == sr.realtime_end
-#     end
+    sr = FredData.series.search("monetary service index")
+    @test sr isa SeriesResponse
+    doshow(sr)
+    @test sr.count < 1000
+    @test sr.count == length(sr.seriess)
+    for s in sr.seriess
+        doshow(s)
+        @test s.realtime_start == sr.realtime_start
+        @test s.realtime_end == sr.realtime_end
+    end
 
-#     tr = FredData.series.search_tags("monetary+service+index")
-#     @test tr isa TagsResponse
-#     doshow(tr)
-#     @test tr.count < 1000
-#     @test tr.count == length(tr.tags)
+    tr = FredData.series.search_tags("monetary+service+index")
+    @test tr isa TagsResponse
+    doshow(tr)
+    @test tr.count < 1000
+    @test tr.count == length(tr.tags)
 
-#     tr = FredData.series.search_related_tags("mortgage+rate", ["30-year", "frb"])
-#     @test tr isa TagsResponse
-#     doshow(tr)
-#     @test tr.count < 1000
-#     @test tr.count == length(tr.tags)
+    tr = FredData.series.search_related_tags("mortgage+rate", ["30-year", "frb"])
+    @test tr isa TagsResponse
+    doshow(tr)
+    @test tr.count < 1000
+    @test tr.count == length(tr.tags)
 
-#     tr = FredData.series.tags("STLFSI")
-#     @test tr isa TagsResponse
-#     doshow(tr)
-#     @test tr.count == length(tr.tags)
+    tr = FredData.series.tags("STLFSI")
+    @test tr isa TagsResponse
+    doshow(tr)
+    @test tr.count == length(tr.tags)
 
-#     sr = FredData.series.updates()
-#     @test sr isa SeriesResponse
-#     doshow(sr)
-#     @test sr.count > 100
-#     @test sr.limit == 1000
-#     @test length(sr.seriess) == 1000
+    sr = FredData.series.updates()
+    @test sr isa SeriesResponse
+    doshow(sr)
+    @test sr.count > 100
+    @test sr.limit == 1000
+    @test length(sr.seriess) == 1000
 
-#     vdr = FredData.series.vintagedates("GNPCA")
-#     @test vdr isa VintageDatesResponse
-#     doshow(vdr)
-#     @test vdr.count == length(vdr.vintage_dates)
-# end
+    vdr = FredData.series.vintagedates("GNPCA")
+    @test vdr isa VintageDatesResponse
+    doshow(vdr)
+    @test vdr.count == length(vdr.vintage_dates)
+end
 
 @testset "Sources Endpoints" begin
     sr = FredData.source.get_all()

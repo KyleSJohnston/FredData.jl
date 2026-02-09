@@ -92,6 +92,7 @@ include("responses.jl")
 
 include("category.jl")
 include("release.jl")
+include("series.jl")
 include("source.jl")
 include("tags.jl")
 
@@ -214,5 +215,8 @@ export Source, SourcesResponse, SimpleSourcesResponse
 export TableElement, TableResponse
 export Tag, TagsResponse
 export VintageDatesResponse
+
+# Make fully-qualified endpoint functions available
+@compat public category, release, releases, series, source, tags
 
 end # module
