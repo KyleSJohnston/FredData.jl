@@ -37,9 +37,12 @@ jobs:
         arch:
           - x64
         include:
-          - version: '1.12'
-            env:  # only place requests on 1.12
-              FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          - os: ubuntu-latest
+            version: '1.12'  # only place requests on 1.12
+            arch: x64
+            api_key: ${{ secrets.FRED_API_KEY }}
+    env:
+      FRED_API_KEY: ${{ matrix.api_key }}
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
