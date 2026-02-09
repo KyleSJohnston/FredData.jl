@@ -1,6 +1,17 @@
 using FredData
 using Test
 
+"Sets global API key to `key`, runs `f()`, and restores the original key"
+function with_key(f::Function, key::Union{Nothing,AbstractString})
+    prior_key = FredData.get_api_key(nothing)
+    FredData.set_api_key(key)
+    try
+        f()
+    finally
+        FredData.set_api_key(prior_key)
+    end
+end
+
 function with_key_env(f::Function, key::AbstractString)
     withenv(FredData.KEY_ENV_NAME => key) do
         f()
@@ -30,36 +41,38 @@ function with_key_none(f::Function)
     end
 end
 
-@testset "Client creation with key" begin
-    fake_key = repeat("0", FredData.API_KEY_LENGTH)
-    fake_key1 = repeat("1", FredData.API_KEY_LENGTH)
+with_key(nothing) do
+    @testset "Client creation with key" begin
+        fake_key = repeat("0", FredData.API_KEY_LENGTH)
+        fake_key1 = repeat("1", FredData.API_KEY_LENGTH)
 
-    # pass key directly
-    f1 = Fred(fake_key)
-    @test f1.key == fake_key
+        # pass key directly
+        FredData.set_api_key(fake_key)
+        f1 = FredData.get_api_key(nothing)
+        @test f1 == fake_key
+        @test FredData.get_api_key(Fred()) == fake_key
 
-    # detect from ENV
-    with_key_env(fake_key) do
-        f2 = Fred()
-        @test f2.key == fake_key
+        # detect from ENV
+        f2 = with_key_env(fake_key1) do
+            FredData.load_fred_key()
+            return FredData.get_api_key(nothing)
+        end
+        @test f2 == fake_key1
+
+        # detect from ~/.freddatarc
+        # from libuv::uv_os_homedir, we find we need to set USERPROFILE for windows
+        # and HOME for *nix
+        f3 = with_key_file(fake_key) do
+            FredData.load_fred_key()
+            return FredData.get_api_key(nothing)
+        end
+        @test f3 == fake_key
     end
 
-    # detect from ~/.freddatarc
-    # from libuv::uv_os_homedir, we find we need to set USERPROFILE for windows
-    # and HOME for *nix
-    with_key_file(fake_key1) do
-        f3 = Fred()
-        @test f3.key == fake_key1
-    end
-end
+    @testset "Key Validation" begin
+        @test_throws ArgumentError FredData.set_api_key("bad key short")
 
-@testset "Client creation fails with invalid/missing key" begin
-    bad_key_short = repeat("c",
-                           convert(Int, round(FredData.API_KEY_LENGTH/2)))
-    @test_throws Exception Fred(bad_key_short)
-
-    # no key anywhere
-    with_key_none() do
-        @test_throws Exception Fred()
+        FredData.set_api_key(nothing)
+        @test_throws ErrorException FredData.get_api_key(Fred())
     end
 end

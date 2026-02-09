@@ -4,19 +4,23 @@ author = ["Micah Smith <micahjsmith@gmail.com>"]
 version = "0.7.0"
 
 [deps]
+Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 StructUtils = "ec057cc2-7a8d-4b58-b3b3-92acb9f63b42"
 TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 
 [compat]
+Compat = "3.47.0, 4"
 DataFrames = "1.8"
 Dates = "1"
 HTTP = "1.10"
 JSON = "1.0.1"
+Logging = "1"
 Printf = "1"
 StructUtils = "2.3"
 TimeZones = "1"

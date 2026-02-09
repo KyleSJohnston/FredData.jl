@@ -1,18 +1,17 @@
-__precompile__()
-
-
 module FredData
 
+using Compat
 using DataFrames
 using Dates
+using HTTP: HTTP
+using JSON: JSON
+using Logging
 using Printf
 using TimeZones
-import HTTP
-import JSON
 
 export
        # Fred object
-       Fred, get_api_url, set_api_url!, get_api_key,
+       Fred, get_api_url, set_api_url!,
 
        # FredSeries object
        FredSeries,
@@ -20,16 +19,72 @@ export
        # Download data
        get_data
 
+@compat public get_api_key, set_api_key
+
 const MAX_ATTEMPTS       = 3
 const FIRST_REALTIME     = Date(1776,07,04)
 const LAST_REALTIME      = Date(9999,12,31)
 const EARLY_VINTAGE_DATE = "1991-01-01"
 const FRED_DATE_FORMAT   = DateFormat("yyyy-mm-dd HH:MM:SSzz")
 const OUTPUT_TZ_TYPE     = UTC
-const DEFAULT_API_URL    = "https://api.stlouisfed.org/fred/"
+const API_URL            = "https://api.stlouisfed.org/fred/"
 const API_KEY_LENGTH     = 32
 const KEY_ENV_NAME       = "FRED_API_KEY"
 const KEY_FILE_NAME      = ".freddatarc"
+const API_KEY            = Ref{Union{Nothing,String}}(nothing)
+
+# From https://fred.stlouisfed.org/docs/api/fred/category_series.html#Parameters
+function validate_api_key(api_key::AbstractString)
+    length(api_key) == API_KEY_LENGTH && all(isxdigit, api_key) || throw(ArgumentError("Invalid FRED API key $api_key"))
+    return String(api_key)
+end
+
+"""
+    set_api_key(api_key)
+
+Sets the global api-key constant to `api_key`
+"""
+function set_api_key(api_key::AbstractString)
+    API_KEY[] = validate_api_key(api_key)
+    return nothing  # otherwise this looks a lot like `get_api_key`...
+end
+function set_api_key(::Nothing)
+    API_KEY[] = nothing  # Bypass validation to un-set the key
+    return nothing
+end
+
+"""
+    get_api_key(api_key)
+
+Obtains an `api_key` for use in HTTP requests
+
+- If `api_key` is an instance of `AbstractString`, a `String` representation of `api_key` is returned.
+- If `api_key` is `nothing`, the global API key is returned. (See `set(api_key)`(@ref))
+
+This method serves as the default approach to obtaining an api_key in many
+functions.
+"""
+get_api_key(api_key::AbstractString)::String = validate_api_key(api_key)
+get_api_key(::Nothing) = return API_KEY[]
+
+key_file() = joinpath(homedir(), KEY_FILE_NAME)
+
+function load_fred_key()
+    if haskey(ENV, KEY_ENV_NAME)
+        @info "Loading FRED API Key from environment"
+        set_api_key(ENV[KEY_ENV_NAME])
+    elseif isfile(key_file())
+        @info "Loading FRED API Key from key file"
+        set_api_key(readchomp(key_file()))
+    else
+        @info "Unable to detect FRED API Key"
+        @warn "Run FredData.set_api_key to set a global API key"
+    end
+end
+
+function __init__()
+    load_fred_key()
+end
 
 # Fred connection type
 """
@@ -49,53 +104,17 @@ Notes
 -----
 - Set the API url with `set_api_url!(f::Fred, url::AbstractString)`
 """
-mutable struct Fred
-    key::AbstractString
-    url::AbstractString
-    function Fred(key, url)
-        # Key validation
-        if length(key) > API_KEY_LENGTH
-            key = key[1:API_KEY_LENGTH]
-            @warn("FRED API key too long. First $(API_KEY_LENGTH) chars used.")
-        elseif length(key) < API_KEY_LENGTH
-            error("Invalid FRED API key -- key too short: $(key)")
-        end
-        if !all(isxdigit, key)
-            error("Invalid FRED API key -- invalid characters: $(key)")
-        end
-        return new(key, url)
-    end
-end
-
-Fred(key::AbstractString) = Fred(key, DEFAULT_API_URL)
-
-key_file() = joinpath(homedir(), KEY_FILE_NAME)
-
-function load_fred_key()
-    if KEY_ENV_NAME in keys(ENV)
-        ENV[KEY_ENV_NAME]
-    elseif isfile(key_file())
-        open(key_file(), "r") do file
-            rstrip(read(file, String))
-        end
-    else
-        error("FRED API Key not detected.")
-    end
-end
-
-has_fred_key() = KEY_ENV_NAME in keys(ENV) || isfile(key_file())
-
-function Fred()
-    key = load_fred_key()
-    println("API key loaded.")
-    return Fred(key)
-end
+struct Fred end
 
 """Get the FRED API key that is used for this connection"""
-get_api_key(f::Fred) = f.key
+function get_api_key(::Fred)
+    key = get_api_key(nothing)  # source global key
+    !isnothing(key) || error("FRED API not set; run FredData.set_api_key")
+    return key
+end
 
 """Get the base URL used to connect to the FRED server"""
-get_api_url(f::Fred) = f.url
+get_api_url(::Fred) = API_URL
 
 """Set the base URL used to connect to the FRED server"""
 set_api_url!(f::Fred, url::AbstractString) = setfield!(f, :url, url)
