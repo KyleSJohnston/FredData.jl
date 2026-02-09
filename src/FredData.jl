@@ -11,7 +11,7 @@ using TimeZones
 
 export
        # Fred object
-       Fred, get_api_url, set_api_url!, get_api_key,
+       Fred, get_api_url, set_api_url!,
 
        # FredSeries object
        FredSeries,
