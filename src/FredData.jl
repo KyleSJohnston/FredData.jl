@@ -8,6 +8,7 @@ using JSON: JSON
 using Logging
 using Printf
 using TimeZones
+using URIs: URI
 
 export
        # Fred object
@@ -27,7 +28,7 @@ const LAST_REALTIME      = Date(9999,12,31)
 const EARLY_VINTAGE_DATE = "1991-01-01"
 const FRED_DATE_FORMAT   = DateFormat("yyyy-mm-dd HH:MM:SSzz")
 const OUTPUT_TZ_TYPE     = UTC
-const API_URL            = "https://api.stlouisfed.org/fred/"
+const API_URL            = URI("https://api.stlouisfed.org/fred")
 const API_KEY_LENGTH     = 32
 const KEY_ENV_NAME       = "FRED_API_KEY"
 const KEY_FILE_NAME      = ".freddatarc"
@@ -97,20 +98,6 @@ include("tags.jl")
 # Fred connection type
 """
 A connection to the Fred API.
-
-Constructors
-------------
-- `Fred()`: Key detected automatically. First, looks for the environment variable
-    `FRED_API_KEY`, then looks for the file `~/.freddatarc`.
-- `Fred(key::AbstractString)`: User specifies key directly
-
-Arguments
----------
-- `key`: Registration key provided by FRED.
-
-Notes
------
-- Set the API url with `set_api_url!(f::Fred, url::AbstractString)`
 """
 struct Fred end
 
@@ -123,9 +110,6 @@ end
 
 """Get the base URL used to connect to the FRED server"""
 get_api_url(::Fred) = API_URL
-
-"""Set the base URL used to connect to the FRED server"""
-set_api_url!(f::Fred, url::AbstractString) = setfield!(f, :url, url)
 
 function Base.show(io::IO, f::Fred)
     @printf io "FRED API Connection\n"
