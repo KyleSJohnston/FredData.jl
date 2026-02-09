@@ -27,22 +27,15 @@ jobs:
       fail-fast: true
       matrix:
         version:
-          - '1.10'
-          - '1.11'
+          # - '1.10'
+          # - '1.11'
           - '1.12'
-          - '1.12-nightly'
-          - 'pre'
+          # - '1.12-nightly'
+          # - 'pre'
         os:
           - ubuntu-latest
         arch:
           - x64
-        include:
-          - os: ubuntu-latest
-            version: '1.12'  # only place requests on 1.12
-            arch: x64
-            api_key: ${{ secrets.FRED_API_KEY }}
-    env:
-      FRED_API_KEY: ${{ matrix.api_key }}
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
@@ -52,3 +45,5 @@ jobs:
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
